@@ -1,0 +1,218 @@
+%% 
+%% Technical Paper Template for CCS
+%%
+%% Adapted from SIGCONF Proceedings template
+%%
+
+%%
+%% The first command in your LaTeX source must be the \documentclass command.
+\documentclass[sigconf, pbalance]{acmart}
+
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+%%
+%% Remove the ACM References statement and copyright notice.
+\settopmatter{printacmref=false}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+
+
+%%
+%% Majority of ACM publications use numbered citations and references.
+%% For managing citations, it is recommended to use bibliography files in BibTeX format.
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-reference.bib file enumerating your References.
+
+
+%% %% %% %% %%
+%% Start of the actual paper.
+\begin{document}
+
+%%
+%% Paper title.
+\title{The Name of the Title is Hope}
+
+%%
+%% Authors
+\author{Lars Th{\o}rv{\"a}ld}
+\affiliation{%
+  \institution{The Th{\o}rv{\"a}ld Group}
+  \city{Hekla}
+  \country{Iceland}}
+\email{larst@affiliation.org}
+
+\author{Charles Palmer}
+\affiliation{%
+  \institution{Palmer Research Laboratories}
+  \city{San Antonio}
+  \country{USA}}
+\email{cpalmer@prl.com}
+
+\author{John Smith}
+\affiliation{%
+  \institution{The Th{\o}rv{\"a}ld Group}
+  \city{Hekla}
+  \country{Iceland}}
+\email{jsmith@affiliation.org}
+
+
+%%
+%% By default, the full list of authors will be used in the page headers.
+%% Often, this list is too long and will overlap other information printed in the page headers. 
+%% This command allows the author to define a more concise list of authors' names for this purpose.
+\renewcommand{\shortauthors}{Trovato et al.}
+
+
+%%
+%% The abstract is a short summary of the work to be presented in the article.
+\begin{abstract}
+This set of guidelines for formatting your research paper has been adapted from the formatting guidelines for ACM SIG Proceedings. The Abstract should consist of 150 to 250 words in a single paragraph that provides the reader with a summary of your research/project and what you intend to do. It gives a brief description of the motivation for your research/project, the problem you intend to cover, the purpose and method for conducting your study, and your results and findings.
+\end{abstract}
+
+
+%%
+%% Keywords
+%% The author(s) should pick words that accurately describe the work being presented. 
+%% Separate the keywords with commas.
+%% Aside from proper nouns and acronyms, only the first letter of the first keyword should be capitalized
+\keywords{Data Warehouse, ETL, OLAP, Query Processing, Query Optimization}
+
+%%
+%% This command processes the author and affiliation and title information and builds the first part of the formatted document.
+\maketitle
+
+%%
+%%
+%% --- Introduction ---
+%%
+\section{Introduction}
+
+Conference proceedings and journal publications usually ask authors to follow a set of guidelines to make the paper appear of high quality. Some of our courses require students to adapt these guidelines to prepare them for publishing their work. Thus, it is mandatory that you ensure your research / technical paper look exactly like this document. The easiest way to do this is to simply download a copy of this document and type-over the contents with your own material. Do not change any formatting or introduce your own style.
+
+
+%%
+%%
+%% --- Basic Elements ---
+%%
+\section{Basic Elements}
+
+Most publications contain a number of basic elements, such as the Title, Authors List, Abstract, Figures/Tables/Listings, and References. Use the given format in writing for Title, Authors List and Abstract. Do not change or introduce your own format.
+
+%%
+%%
+\subsection{Figures, Tables and Listings}
+
+Place tables, figures and code listings as close to the text where they are referenced as possible.  If necessary, a table, figure or code listing may extend across both columns to a maximum width of 17.78 cm (7”).
+
+Figures, tables and listings should have captions. The captions are in Times New Roman 9-point bold.  They should be numbered (e.g., “Table 1” or “Figure 2” or “Listing 1”). Note that the word for Table and Figure are spelled out. 
+
+Figures are used to refer to diagrams, pictures and charts. The ``\verb|figure|'' environment should be used for figures. Your figures should contain a caption which describes the figure to
+the reader. The caption should be centered beneath the image or picture. If your figure contains third-party material, you must clearly identify it as such, as shown in Figure 
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{sample-pizzeria.png}
+  \caption{Main Interface of Pizzeria Story \cite{YuGalan2017}}
+\end{figure}
+
+Tables are used to refer to columnar data such as test results. The ``\verb|acmart|'' document class includes the ``\verb|booktabs|'' package for preparing high-quality tables. A table’s caption should be placed above the table body as shown in Table \ref{tab:results}. 
+
+\begin{table}
+  \caption{Table captions are placed above the table.}
+  \label{tab:results}
+  \begin{tabular}{cccc}
+    \toprule
+    \textbf{Item} & \textbf{Rating 1} & \textbf{Rating 2} & \textbf{Rating 3} \\
+    \midrule
+    Item \#1 & N (\%)  & N (\%)  & N (\%) \\
+    Item \#2 & N (\%)  & N (\%)  & N (\%) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Listings are used to refer to algorithms or pseudocodes, code snippets, text excerpts, and text output from executing a code. A listing’s caption is placed left-justified above the listing as shown in Listing 1. When presenting your code, use the LaTex \verb|verbatim| construct and place each  SQL clause in a separate line to increase clarity, as shown in the example below:
+\begin{verbatim}
+   SELECT C.city, COUNT(*)
+   FROM   customers C, orders O
+   WHERE  C.custid = O.custid
+   GROUP BY C.city
+\end{verbatim}
+
+Further note that we refer to figures, tables and listings as “Figure x”, “Table x”, and “Listing x”, where x begins from 1. Avoid using prepositions like “above” and “below”. 
+
+
+%%
+%%
+\subsection{Footnotes, References and Citations}
+
+Footnotes should be Times New Roman 9-point, and justified to the full width of the column.
+
+Citations in ACM publications follow the numbered format, e.g., “Forman \cite{Cohen07} reported that …”, “In the study of Kosiur \cite{Kosiur01}, …”, “Anisi \cite{Anisi03} used …”, “… as described in \cite{Spector90}”, and “Pizzeria \cite{YuGalan2017} is an interactive storytelling environment that…”. Notice also the varying ways by which we can cite different related works.
+
+We follow the \verb|ACM Reference format| for our references which uses a numbered list at the end of the article, ordered \textbf{alphabetically} and formatted accordingly. See examples of some typical reference types in \verb|sample-reference.bib| at the end of this document. 
+
+The references are also in Times New Roman 9-point, but that section (see Section 4) is ragged right. 
+
+References should be published materials accessible to the public. Internal technical reports may be cited only if they are easily accessible, e.g., some Universities and research labs provide copies of their manuscripts as technical reports. Arxiv is also another popular venue for citing technical papers. Proprietary information may not be cited. Private communications should be acknowledged, not referenced  (e.g., “[Robertson, personal communication]”).
+
+The following are some guidelines in helping you come up with correct references:
+\begin{enumerate}
+    \item Follow the stated format required by a particular publication. For example, some publications require the full name of the authors to be stated while others only require the lastname, followed by the initial of the firstname.
+    \item For publications sourced from ACM, IEEE and Springer, you can use their “cite as” feature to get the complete publication details, including the publication title, the page numbers, and publisher name.
+    \item Section 4 provides some example publications. Determine which of the examples closely match your reference, then use that example publication format. For instance, use \cite{Abril07} and \cite{Cohen07} for journal publications; \cite{Smith10} and \cite{YuGalan2017} for conference papers that are published in conference proceedings; \cite{Harel78} for technical reports; \cite{Kosiur01} for a book reference; and \cite{Anisi03} and \cite{Clarkson85} for thesis documents. In case a thesis has been published, cite the publication instead. \cite{Thornburg01} shows an example of citing an online article from a reputable organization.
+    \item Newer publications may also include doi. You can indicate those after the publisher details. See \verb|sample-reference.bib| for examples.
+
+\end{enumerate}
+
+%%
+%%
+%% --- MCO Technical Report Content ---
+%%
+\section{Technical Report Content}
+
+The sections for your Technical Report are described in the corresponding project specifications found in AnimoSpace. 
+To use this ACM paper template, replace each section with the required section heading as indicated in the project specifications. For example, for MCO1, the sections are:
+\begin{verbatim}
+    1. Introduction
+    2. Data Warehouse
+    3. ETL Script
+    4. OLAP Application
+    5. Query Processing and Optimization
+    6. Results and Analysis
+    7. Conclusion
+    8. References
+    9. Declarations
+\end{verbatim}
+
+You may optionally include an Appendix to show your code snippets, SQL statements, sample extract of the dataset, and sample query results.
+
+
+
+%%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample-reference}
+
+
+
+%%
+%%
+%% --- Appendices ---
+%%
+\appendix
+
+\section{Appendices}
+Some conference papers include an Appendix where authors can place supplementary materials. 
+
+For our Technical Report, supplementary materials may include code snippets, SQL statements, sample extract of the dataset, and sample query results. These are used to help your readers better understand your implementation and your discussion.
+
+Note that in the appendix, sections are lettered, not
+numbered. 
+
+\end{document}
