@@ -1,0 +1,26 @@
+{
+  "name": "stadvdb-mco2-transaction-management-technical-report",
+  "version": "1.0.0",
+  "description": "Source: https://drive.google.com/drive/folders/11IpWBL3_2bsQ-1X5kkNKuS1HPGM7CeaR?usp=sharing",
+  "homepage": "https://github.com/aaaaandreiii/STADVDB-MCO2-Transaction-Management-Technical-Report#readme",
+  "bugs": {
+    "url": "https://github.com/aaaaandreiii/STADVDB-MCO2-Transaction-Management-Technical-Report/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaaaandreiii/STADVDB-MCO2-Transaction-Management-Technical-Report.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mysql2": "^3.15.3"
+  }
+}
