@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS mydb_node2;
+USE mydb_node2;
+
 -- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mydb_node2
@@ -52,3 +55,4 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-11-27 19:44:51
+
