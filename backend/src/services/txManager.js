@@ -33,8 +33,8 @@ function requireTx(txId) {
   if (tx.status !== 'active') {
     throw new Error(`Transaction ${txId} is not active (status: ${tx.status})`);
   }
-  // Integrate node failure into normal operations:
-  // If a node is marked offline, existing transactions on that node cannot proceed.
+  //integrate node failure into normal operations:
+  //    if a node is marked offline, existing transactions on that node cannot proceed.
   if (!isNodeOnline(tx.nodeId)) {
     throw new Error(
       `Node ${tx.nodeId} is offline in this simulation; transaction ${txId} cannot proceed`
@@ -43,9 +43,7 @@ function requireTx(txId) {
   return tx;
 }
 
-/**
- * Start a new transaction on a given node with a specified isolation level.
- */
+//start new transaction on given node with a specified isolation level
 async function startTransaction({ nodeId, isolationLevel, description }) {
   const node = parseInt(nodeId || currentNodeId, 10);
   if (![1, 2, 3].includes(node)) {
@@ -69,7 +67,7 @@ async function startTransaction({ nodeId, isolationLevel, description }) {
   const conn = await pool.getConnection();
 
   try {
-    // Configure isolation level and start transaction
+    //configure isolation level and start transaction
     await conn.query(`SET SESSION TRANSACTION ISOLATION LEVEL ${iso}`);
     await conn.beginTransaction();
 
@@ -104,9 +102,7 @@ async function startTransaction({ nodeId, isolationLevel, description }) {
   }
 }
 
-/**
- * Read a specific trans row inside a transaction.
- */
+//read a specific trans row inside a transaction
 async function readTrans({ txId, transId }) {
   const tx = requireTx(txId);
   const id = parseInt(transId, 10);
@@ -128,10 +124,8 @@ async function readTrans({ txId, transId }) {
   return { row, nodeId: tx.nodeId, isolationLevel: tx.isolationLevel };
 }
 
-/**
- * Update a row (amount/balance deltas) inside a transaction.
- * Also queues replication log entries for the change.
- */
+//1. UPDATE a row inside a transaction
+//2. queue replication log entries for the change
 async function updateTrans(params) {
   const { txId, transId, amountDelta, balanceDelta } = params;
   const tx = requireTx(txId);
@@ -139,7 +133,8 @@ async function updateTrans(params) {
   const deltaAmount = Number(amountDelta || 0);
   const deltaBalance = Number(balanceDelta || 0);
 
-  // Read current state (and lock the row for this transaction)
+  //read current state 
+  //    then lock row for this transaction
   const [rows] = await tx.connection.query(
     `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
     [id]
@@ -155,7 +150,6 @@ async function updateTrans(params) {
   const amountAfter = amountBefore + deltaAmount;
   const balanceAfter = balanceBefore + deltaBalance;
 
-  // Perform the update
   await tx.connection.query(
     `
     UPDATE trans
@@ -165,11 +159,11 @@ async function updateTrans(params) {
     [amountAfter, balanceAfter, tx.nodeId, id]
   );
 
-  // Queue replication log entries (inside same local transaction)
+  //queue replication log entries
   await queueReplicationForRow(tx.connection, {
     sourceNodeId: tx.nodeId,
     transId: id,
-    type: current.type, // <-- route based on type (Credit / Debit / VYBER)
+    type: current.type,
     opType: 'UPDATE',
     amountBefore,
     balanceBefore,
@@ -196,14 +190,12 @@ async function updateTrans(params) {
   };
 }
 
-/**
- * Delete a row inside a transaction.
- */
+//DELETE row inside a transaction
 async function deleteTrans({ txId, transId }) {
   const tx = requireTx(txId);
   const id = parseInt(transId, 10);
 
-  // Read current state for logging & replication
+  //read current state --> logging and replication
   const [rows] = await tx.connection.query(
     `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
     [id]
@@ -248,9 +240,7 @@ async function deleteTrans({ txId, transId }) {
   };
 }
 
-/**
- * Commit a transaction.
- */
+//COMMIT transaction
 async function commitTransaction({ txId }) {
   const tx = requireTx(txId);
 
@@ -273,9 +263,7 @@ async function commitTransaction({ txId }) {
   };
 }
 
-/**
- * Rollback a transaction.
- */
+//ROLLBACK transaction
 async function rollbackTransaction({ txId }) {
   const tx = requireTx(txId);
 
@@ -298,9 +286,7 @@ async function rollbackTransaction({ txId }) {
   };
 }
 
-/**
- * Inspect all active/finished transactions (for debugging / test scripts).
- */
+//DEBUGGING: find all active/finished transactions
 function listTransactions() {
   return Array.from(txStore.values()).map((tx) => ({
     txId: tx.txId,

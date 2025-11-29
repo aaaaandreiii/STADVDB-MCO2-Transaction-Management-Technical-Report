@@ -15,6 +15,70 @@
     <li>Node 3 should show only Transaction Type: Debit (Withdrawal), VYBER.</li>
   </ul>
 
+  <!-- pagination controls -->
+  <div class="pagination-controls">
+    <div class="page-size">
+      <form method="get" action="/transactions/local">
+        <label for="pageSize">
+          Rows per page:
+        </label>
+        <select id="pageSize" name="pageSize" onchange="this.form.submit()">
+          <option value="10" <%= pageSize === 10 ? 'selected' : '' %>>10</option>
+          <option value="25" <%= pageSize === 25 ? 'selected' : '' %>>25</option>
+          <option value="50" <%= pageSize === 50 ? 'selected' : '' %>>50</option>
+          <option value="100" <%= pageSize === 100 ? 'selected' : '' %>>100</option>
+          <option value="200" <%= pageSize === 200 ? 'selected' : '' %>>200</option>
+        </select>
+        <!-- always reset to page 1 when changing page size -->
+        <input type="hidden" name="page" value="1" />
+      </form>
+    </div>
+
+    <div class="page-info">
+      <% const startRow = totalCount === 0 ? 0 : ((page - 1) * pageSize + 1); %>
+      <% const endRow = Math.min(page * pageSize, totalCount); %>
+      <span>
+        Page <strong><%= page %></strong> of <strong><%= totalPages %></strong>
+        &mdash;
+        Showing <strong><%= startRow %></strong>–<strong><%= endRow %></strong>
+        of <strong><%= totalCount %></strong> rows
+      </span>
+    </div>
+
+    <div class="page-nav">
+      <% const prevPage = page > 1 ? page - 1 : 1; %>
+      <% const nextPage = page < totalPages ? page + 1 : totalPages; %>
+
+      <a
+        href="/transactions/local?page=1&pageSize=<%= pageSize %>"
+        class="page-button <%= page === 1 ? 'disabled' : '' %>"
+      >
+        « First
+      </a>
+
+      <a
+        href="/transactions/local?page=<%= prevPage %>&pageSize=<%= pageSize %>"
+        class="page-button <%= page === 1 ? 'disabled' : '' %>"
+      >
+        ‹ Prev
+      </a>
+
+      <a
+        href="/transactions/local?page=<%= nextPage %>&pageSize=<%= pageSize %>"
+        class="page-button <%= page === totalPages ? 'disabled' : '' %>"
+      >
+        Next ›
+      </a>
+
+      <a
+        href="/transactions/local?page=<%= totalPages %>&pageSize=<%= pageSize %>"
+        class="page-button <%= page === totalPages ? 'disabled' : '' %>"
+      >
+        Last »
+      </a>
+    </div>
+  </div>
+
   <% if (!rows || rows.length === 0) { %>
     <p><em>No rows found on this node.</em></p>
   <% } else { %>
