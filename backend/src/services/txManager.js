@@ -1,0 +1,326 @@
+const { getPool, currentNodeId } = require('../db');
+const { queueReplicationForRow } = require('./replication');
+const { isNodeOnline } = require('../state/nodeStatus');
+
+const ISOLATION_LEVELS = [
+  'READ UNCOMMITTED',
+  'READ COMMITTED',
+  'REPEATABLE READ',
+  'SERIALIZABLE'
+];
+
+//in-memory map of active transactions: txId -> metadata
+const txStore = new Map();
+
+function normalizeIsolationLevel(level) {
+  if (!level) return null;
+  const upper = String(level).trim().toUpperCase();
+  if (ISOLATION_LEVELS.includes(upper)) {
+    return upper;
+  }
+  return null;
+}
+
+function generateTxId() {
+  return `tx-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+}
+
+function requireTx(txId) {
+  const tx = txStore.get(txId);
+  if (!tx) {
+    throw new Error(`Transaction ${txId} not found or already finished`);
+  }
+  if (tx.status !== 'active') {
+    throw new Error(`Transaction ${txId} is not active (status: ${tx.status})`);
+  }
+  // Integrate node failure into normal operations:
+  // If a node is marked offline, existing transactions on that node cannot proceed.
+  if (!isNodeOnline(tx.nodeId)) {
+    throw new Error(
+      `Node ${tx.nodeId} is offline in this simulation; transaction ${txId} cannot proceed`
+    );
+  }
+  return tx;
+}
+
+/**
+ * Start a new transaction on a given node with a specified isolation level.
+ */
+async function startTransaction({ nodeId, isolationLevel, description }) {
+  const node = parseInt(nodeId || currentNodeId, 10);
+  if (![1, 2, 3].includes(node)) {
+    throw new Error('nodeId must be 1, 2, or 3');
+  }
+
+  if (!isNodeOnline(node)) {
+    throw new Error(
+      `Node ${node} is offline in this simulation; cannot start a new transaction on it`
+    );
+  }
+
+  const iso = normalizeIsolationLevel(isolationLevel);
+  if (!iso) {
+    throw new Error(
+      `Invalid isolationLevel. Expected one of: ${ISOLATION_LEVELS.join(', ')}`
+    );
+  }
+
+  const pool = getPool(node);
+  const conn = await pool.getConnection();
+
+  try {
+    // Configure isolation level and start transaction
+    await conn.query(`SET SESSION TRANSACTION ISOLATION LEVEL ${iso}`);
+    await conn.beginTransaction();
+
+    const txId = generateTxId();
+    const tx = {
+      txId,
+      nodeId: node,
+      isolationLevel: iso,
+      description: description || null,
+      status: 'active',
+      startedAt: new Date(),
+      operations: [],
+      connection: conn
+    };
+
+    txStore.set(txId, tx);
+
+    console.log(
+      `[TX] Started transaction ${txId} on node ${node} (${iso})`
+    );
+
+    return {
+      txId,
+      nodeId: node,
+      isolationLevel: iso,
+      description: tx.description,
+      startedAt: tx.startedAt
+    };
+  } catch (err) {
+    conn.release();
+    throw err;
+  }
+}
+
+/**
+ * Read a specific trans row inside a transaction.
+ */
+async function readTrans({ txId, transId }) {
+  const tx = requireTx(txId);
+  const id = parseInt(transId, 10);
+
+  const [rows] = await tx.connection.query(
+    `SELECT * FROM trans WHERE trans_id = ?`,
+    [id]
+  );
+
+  const row = rows[0] || null;
+
+  tx.operations.push({
+    type: 'READ',
+    transId: id,
+    at: new Date(),
+    rowSnapshot: row
+  });
+
+  return { row, nodeId: tx.nodeId, isolationLevel: tx.isolationLevel };
+}
+
+/**
+ * Update a row (amount/balance deltas) inside a transaction.
+ * Also queues replication log entries for the change.
+ */
+async function updateTrans(params) {
+  const { txId, transId, amountDelta, balanceDelta } = params;
+  const tx = requireTx(txId);
+  const id = parseInt(transId, 10);
+  const deltaAmount = Number(amountDelta || 0);
+  const deltaBalance = Number(balanceDelta || 0);
+
+  // Read current state (and lock the row for this transaction)
+  const [rows] = await tx.connection.query(
+    `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+    [id]
+  );
+
+  if (!rows || rows.length === 0) {
+    throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
+  }
+
+  const current = rows[0];
+  const amountBefore = current.amount;
+  const balanceBefore = current.balance;
+  const amountAfter = amountBefore + deltaAmount;
+  const balanceAfter = balanceBefore + deltaBalance;
+
+  // Perform the update
+  await tx.connection.query(
+    `
+    UPDATE trans
+    SET amount = ?, balance = ?, last_updated_by_node = ?, version = version + 1
+    WHERE trans_id = ?
+    `,
+    [amountAfter, balanceAfter, tx.nodeId, id]
+  );
+
+  // Queue replication log entries (inside same local transaction)
+  await queueReplicationForRow(tx.connection, {
+    sourceNodeId: tx.nodeId,
+    transId: id,
+    type: current.type, // <-- route based on type (Credit / Debit / VYBER)
+    opType: 'UPDATE',
+    amountBefore,
+    balanceBefore,
+    amountAfter,
+    balanceAfter
+  });
+
+  const op = {
+    type: 'UPDATE',
+    transId: id,
+    at: new Date(),
+    amountBefore,
+    balanceBefore,
+    amountAfter,
+    balanceAfter
+  };
+
+  tx.operations.push(op);
+
+  return {
+    nodeId: tx.nodeId,
+    isolationLevel: tx.isolationLevel,
+    op
+  };
+}
+
+/**
+ * Delete a row inside a transaction.
+ */
+async function deleteTrans({ txId, transId }) {
+  const tx = requireTx(txId);
+  const id = parseInt(transId, 10);
+
+  // Read current state for logging & replication
+  const [rows] = await tx.connection.query(
+    `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+    [id]
+  );
+
+  if (!rows || rows.length === 0) {
+    throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
+  }
+
+  const current = rows[0];
+
+  await tx.connection.query(
+    `DELETE FROM trans WHERE trans_id = ?`,
+    [id]
+  );
+
+  await queueReplicationForRow(tx.connection, {
+    sourceNodeId: tx.nodeId,
+    transId: id,
+    type: current.type,
+    opType: 'DELETE',
+    amountBefore: current.amount,
+    balanceBefore: current.balance,
+    amountAfter: null,
+    balanceAfter: null
+  });
+
+  const op = {
+    type: 'DELETE',
+    transId: id,
+    at: new Date(),
+    amountBefore: current.amount,
+    balanceBefore: current.balance
+  };
+
+  tx.operations.push(op);
+
+  return {
+    nodeId: tx.nodeId,
+    isolationLevel: tx.isolationLevel,
+    op
+  };
+}
+
+/**
+ * Commit a transaction.
+ */
+async function commitTransaction({ txId }) {
+  const tx = requireTx(txId);
+
+  await tx.connection.commit();
+  tx.connection.release();
+
+  tx.status = 'committed';
+  tx.finishedAt = new Date();
+
+  console.log(
+    `[TX] Committed transaction ${tx.txId} on node ${tx.nodeId}`
+  );
+
+  return {
+    txId: tx.txId,
+    nodeId: tx.nodeId,
+    isolationLevel: tx.isolationLevel,
+    status: tx.status,
+    finishedAt: tx.finishedAt
+  };
+}
+
+/**
+ * Rollback a transaction.
+ */
+async function rollbackTransaction({ txId }) {
+  const tx = requireTx(txId);
+
+  await tx.connection.rollback();
+  tx.connection.release();
+
+  tx.status = 'rolledback';
+  tx.finishedAt = new Date();
+
+  console.log(
+    `[TX] Rolled back transaction ${tx.txId} on node ${tx.nodeId}`
+  );
+
+  return {
+    txId: tx.txId,
+    nodeId: tx.nodeId,
+    isolationLevel: tx.isolationLevel,
+    status: tx.status,
+    finishedAt: tx.finishedAt
+  };
+}
+
+/**
+ * Inspect all active/finished transactions (for debugging / test scripts).
+ */
+function listTransactions() {
+  return Array.from(txStore.values()).map((tx) => ({
+    txId: tx.txId,
+    nodeId: tx.nodeId,
+    isolationLevel: tx.isolationLevel,
+    description: tx.description,
+    status: tx.status,
+    startedAt: tx.startedAt,
+    finishedAt: tx.finishedAt || null,
+    operationCount: tx.operations.length
+  }));
+}
+
+module.exports = {
+  ISOLATION_LEVELS,
+  startTransaction,
+  readTrans,
+  updateTrans,
+  deleteTrans,
+  commitTransaction,
+  rollbackTransaction,
+  listTransactions
+};
