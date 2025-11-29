@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const hbs = require('hbs');
 const { currentNodeId, currentNode } = require('./config/nodes');
 
 const indexRoutes = require('./routes/index');
@@ -20,17 +21,19 @@ app.use(
   express.static(path.join(__dirname, 'public'))
 );
 
-app.set('view engine', 'ejs');
+// ---- Handlebars view engine ----
+app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
+hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
 
-//locals per-request so views know where they are running
+// locals per-request so views know where they are running
 app.use((req, res, next) => {
   res.locals.nodeId = currentNodeId;
   res.locals.nodeRole = currentNode.role;
   next();
 });
 
-//routes
+// routes
 app.use('/', indexRoutes);
 app.use('/transactions', transactionsRoutes);
 app.use('/concurrency', concurrencyRoutes);
@@ -39,7 +42,6 @@ app.use('/admin', adminRoutes);
 
 app.use('/api/tx', txApiRoutes);
 app.use('/api/replication', replicationApiRoutes);
-
 
 app.use((err, req, res, next) => {
   console.error('[ERROR]', err);

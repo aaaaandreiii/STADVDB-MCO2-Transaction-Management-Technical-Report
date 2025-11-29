@@ -1,4 +1,4 @@
-<%- include('partials/header') %>
+{{> header}}
 
 <section class="card">
   <h2>Concurrency Experiments</h2>
@@ -29,20 +29,20 @@
     <div class="field-group">
       <label>Node:</label>
       <select id="txA-node">
-        <% nodes.forEach(n => { %>
-          <option value="<%= n.id %>">
-            Node <%= n.id %> (<%= n.role %>)
+        {{#each nodes}}
+          <option value="{{id}}">
+            Node {{id}} ({{role}})
           </option>
-        <% }) %>
+        {{/each}}
       </select>
     </div>
 
     <div class="field-group">
       <label>Isolation level:</label>
       <select id="txA-iso">
-        <% isolationLevels.forEach(level => { %>
-          <option value="<%= level %>"><%= level %></option>
-        <% }) %>
+        {{#each isolationLevels}}
+          <option value="{{this}}">{{this}}</option>
+        {{/each}}
       </select>
     </div>
 
@@ -89,20 +89,20 @@
     <div class="field-group">
       <label>Node:</label>
       <select id="txB-node">
-        <% nodes.forEach(n => { %>
-          <option value="<%= n.id %>">
-            Node <%= n.id %> (<%= n.role %>)
+        {{#each nodes}}
+          <option value="{{id}}">
+            Node {{id}} ({{role}})
           </option>
-        <% }) %>
+        {{/each}}
       </select>
     </div>
 
     <div class="field-group">
       <label>Isolation level:</label>
       <select id="txB-iso">
-        <% isolationLevels.forEach(level => { %>
-          <option value="<%= level %>"><%= level %></option>
-        <% }) %>
+        {{#each isolationLevels}}
+          <option value="{{this}}">{{this}}</option>
+        {{/each}}
       </select>
     </div>
 
@@ -188,9 +188,9 @@
     const timestamp = new Date().toISOString();
     let line = '[' + timestamp + '] ' + message;
     if (payload !== undefined) {
-      line += '\\n  ' + JSON.stringify(payload, null, 2);
+      line += '\n  ' + JSON.stringify(payload, null, 2);
     }
-    logEl.textContent += line + '\\n';
+    logEl.textContent += line + '\n';
     logEl.scrollTop = logEl.scrollHeight;
   }
 
@@ -292,4 +292,4 @@
   }
 </script>
 
-<%- include('partials/footer') %>
+{{> footer}}

@@ -1,4 +1,4 @@
-<%- include('partials/header') %>
+{{> header}}
 
 <section class="card">
   <h2>Admin / Failure Simulation Panel</h2>
@@ -27,23 +27,25 @@
       </tr>
     </thead>
     <tbody id="nodes-table-body">
-      <% nodes.forEach((n) => { const s = status[n.id] || { online: true }; %>
-        <tr data-node-id="<%= n.id %>">
-          <td>Node <%= n.id %></td>
-          <td><%= n.role %></td>
-          <td class="node-status">
-            <%= s.online ? 'ONLINE' : 'OFFLINE' %>
-          </td>
-          <td>
-            <button type="button" onclick="setNodeOnline(<%= n.id %>, true)">
-              Set ONLINE
-            </button>
-            <button type="button" onclick="setNodeOnline(<%= n.id %>, false)">
-              Set OFFLINE
-            </button>
-          </td>
-        </tr>
-      <% }) %>
+      {{#each nodes}}
+        {{#with (lookup ../status id)}}
+          <tr data-node-id="{{../id}}">
+            <td>Node {{../id}}</td>
+            <td>{{../role}}</td>
+            <td class="node-status">
+              {{#if online}}ONLINE{{else}}OFFLINE{{/if}}
+            </td>
+            <td>
+              <button type="button" onclick="setNodeOnline({{../id}}, true)">
+                Set ONLINE
+              </button>
+              <button type="button" onclick="setNodeOnline({{../id}}, false)">
+                Set OFFLINE
+              </button>
+            </td>
+          </tr>
+        {{/with}}
+      {{/each}}
     </tbody>
   </table>
 
@@ -103,4 +105,4 @@
   });
 </script>
 
-<%- include('partials/footer') %>
+{{> footer}}

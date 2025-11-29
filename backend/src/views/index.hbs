@@ -1,4 +1,4 @@
-<%- include('partials/header') %>
+{{> header}}
 
 <section class="card">
   <h2>Welcome</h2>
@@ -23,7 +23,7 @@
   </ul>
   <p>
     You are currently on
-    <strong>Node <%= nodeId %> (<%= nodeRole %>)</strong>.
+    <strong>Node {{nodeId}} ({{nodeRole}})</strong>.
   </p>
 
   <h3>Quick links</h3>
@@ -39,4 +39,4 @@
   </ul>
 </section>
 
-<%- include('partials/footer') %>
+{{> footer}}
