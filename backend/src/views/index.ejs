@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<section class="card">
+  <h2>Welcome</h2>
+  <p>
+    This is the distributed database demo for
+    <strong>STADVDB MCO2 - Transactions Management</strong>.
+  </p>
+  <ul>
+    <li>
+      Node 1 is the <strong>central</strong> node holding a full copy of the
+      <code>trans</code> table.
+    </li>
+    <li>
+      Nodes 2 and 3 are <strong>horizontal fragments</strong> based on
+      <code>type</code>:
+      <ul>
+        <li>Node 2: rows where <code>Transaction Type: Credit</code></li>
+        <li>Node 3: rows where <code>Transaction Type: Debit (Withdrawal), VYBER</code></li>
+      </ul>
+      Together, Node 2 and Node 3 form a non-overlapping partition of Node 1's rows.
+    </li>
+  </ul>
+  <p>
+    You are currently on
+    <strong>Node <%= nodeId %> (<%= nodeRole %>)</strong>.
+  </p>
+
+  <h3>Quick links</h3>
+  <ul>
+    <li>
+      <a href="/transactions/local">
+        View local fragment (this node's <code>trans</code> table)
+      </a>
+    </li>
+    <li><a href="/concurrency">Run manual concurrency experiments</a></li>
+    <li><a href="/replication">Replication dashboard</a></li>
+    <li><a href="/admin/panel">Node status / failure simulation</a></li>
+  </ul>
+</section>
+
+<%- include('partials/footer') %>

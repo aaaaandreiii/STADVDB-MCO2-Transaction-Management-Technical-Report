@@ -1,0 +1,295 @@
+<%- include('partials/header') %>
+
+<section class="card">
+  <h2>Concurrency Experiments</h2>
+  <p>
+    Use this page to simulate the three concurrency cases under different
+    isolation levels:
+  </p>
+  <ol>
+    <li>Case #1: concurrent <strong>reads</strong> of the same data item.</li>
+    <li>Case #2: <strong>write + read</strong> on the same data item.</li>
+    <li>Case #3: concurrent <strong>writes</strong> on the same data item.</li>
+  </ol>
+  <p>
+    Each panel below controls a separate transaction (Tx A and Tx B).
+    You can choose:
+  </p>
+  <ul>
+    <li>Which node (1, 2, or 3) to run the transaction on</li>
+    <li>The transaction isolation level</li>
+    <li>Step-by-step READ, UPDATE, COMMIT, ROLLBACK</li>
+  </ul>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h3>Transaction A</h3>
+
+    <div class="field-group">
+      <label>Node:</label>
+      <select id="txA-node">
+        <% nodes.forEach(n => { %>
+          <option value="<%= n.id %>">
+            Node <%= n.id %> (<%= n.role %>)
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Isolation level:</label>
+      <select id="txA-iso">
+        <% isolationLevels.forEach(level => { %>
+          <option value="<%= level %>"><%= level %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Notes / description:</label>
+      <input id="txA-desc" type="text" placeholder="e.g., Case 2 reader" />
+    </div>
+
+    <input type="hidden" id="txA-id" />
+
+    <div class="buttons">
+      <button type="button" onclick="startTx('A')">Start Tx A</button>
+      <button type="button" onclick="commitTx('A')">Commit</button>
+      <button type="button" onclick="rollbackTx('A')">Rollback</button>
+    </div>
+
+    <h4>Row-level operations</h4>
+    <div class="field-group">
+      <label>trans_id:</label>
+      <input id="txA-transId" type="number" min="1" value="1" />
+    </div>
+    <div class="field-group">
+      <label>amount Δ:</label>
+      <input id="txA-amountDelta" type="number" value="100" />
+    </div>
+    <div class="field-group">
+      <label>balance Δ:</label>
+      <input id="txA-balanceDelta" type="number" value="100" />
+    </div>
+
+    <div class="buttons">
+      <button type="button" onclick="readRow('A')">READ</button>
+      <button type="button" onclick="updateRow('A')">UPDATE</button>
+      <button type="button" onclick="deleteRow('A')">DELETE</button>
+    </div>
+
+    <h4>Log</h4>
+    <pre id="txA-log" class="log"></pre>
+  </div>
+
+  <div class="card">
+    <h3>Transaction B</h3>
+
+    <div class="field-group">
+      <label>Node:</label>
+      <select id="txB-node">
+        <% nodes.forEach(n => { %>
+          <option value="<%= n.id %>">
+            Node <%= n.id %> (<%= n.role %>)
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Isolation level:</label>
+      <select id="txB-iso">
+        <% isolationLevels.forEach(level => { %>
+          <option value="<%= level %>"><%= level %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>Notes / description:</label>
+      <input id="txB-desc" type="text" placeholder="e.g., Case 2 writer" />
+    </div>
+
+    <input type="hidden" id="txB-id" />
+
+    <div class="buttons">
+      <button type="button" onclick="startTx('B')">Start Tx B</button>
+      <button type="button" onclick="commitTx('B')">Commit</button>
+      <button type="button" onclick="rollbackTx('B')">Rollback</button>
+    </div>
+
+    <h4>Row-level operations</h4>
+    <div class="field-group">
+      <label>trans_id:</label>
+      <input id="txB-transId" type="number" min="1" value="1" />
+    </div>
+    <div class="field-group">
+      <label>amount Δ:</label>
+      <input id="txB-amountDelta" type="number" value="100" />
+    </div>
+    <div class="field-group">
+      <label>balance Δ:</label>
+      <input id="txB-balanceDelta" type="number" value="100" />
+    </div>
+
+    <div class="buttons">
+      <button type="button" onclick="readRow('B')">READ</button>
+      <button type="button" onclick="updateRow('B')">UPDATE</button>
+      <button type="button" onclick="deleteRow('B')">DELETE</button>
+    </div>
+
+    <h4>Log</h4>
+    <pre id="txB-log" class="log"></pre>
+  </div>
+</section>
+
+<section class="card">
+  <h3>How to use this for your report</h3>
+  <ol>
+    <li>
+      Choose isolation levels for Tx A and Tx B (e.g., both READ COMMITTED).
+    </li>
+    <li>
+      Start both transactions on the same row (e.g., <code>trans_id = 1</code>).
+    </li>
+    <li>
+      Use READ/UPDATE/COMMIT in different orders to see anomalies
+      (dirty reads, non-repeatable reads, lost updates).
+    </li>
+    <li>
+      Capture screenshots and logs for your technical report.
+    </li>
+  </ol>
+</section>
+
+<script>
+  async function api(path, body) {
+    const res = await fetch('/api/tx/' + path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body || {})
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      throw new Error(data.error || 'Unknown error');
+    }
+    return data;
+  }
+
+  function getEl(id) {
+    return document.getElementById(id);
+  }
+
+  function log(panel, message, payload) {
+    const logEl = getEl('tx' + panel + '-log');
+    const timestamp = new Date().toISOString();
+    let line = '[' + timestamp + '] ' + message;
+    if (payload !== undefined) {
+      line += '\\n  ' + JSON.stringify(payload, null, 2);
+    }
+    logEl.textContent += line + '\\n';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  async function startTx(panel) {
+    try {
+      const nodeId = getEl('tx' + panel + '-node').value;
+      const iso = getEl('tx' + panel + '-iso').value;
+      const desc = getEl('tx' + panel + '-desc').value;
+
+      const data = await api('start', {
+        nodeId,
+        isolationLevel: iso,
+        description: desc
+      });
+
+      getEl('tx' + panel + '-id').value = data.tx.txId;
+      log(panel, 'Started transaction', data.tx);
+    } catch (err) {
+      log(panel, 'ERROR starting transaction', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  function ensureTxId(panel) {
+    const id = getEl('tx' + panel + '-id').value;
+    if (!id) {
+      throw new Error('Start transaction ' + panel + ' first');
+    }
+    return id;
+  }
+
+  function readCommonInputs(panel) {
+    return {
+      txId: ensureTxId(panel),
+      transId: getEl('tx' + panel + '-transId').value,
+      amountDelta: getEl('tx' + panel + '-amountDelta').value,
+      balanceDelta: getEl('tx' + panel + '-balanceDelta').value
+    };
+  }
+
+  async function readRow(panel) {
+    try {
+      const { txId, transId } = readCommonInputs(panel);
+      const data = await api('read', { txId, transId });
+      log(panel, 'READ trans_id=' + transId, data.result.row);
+    } catch (err) {
+      log(panel, 'ERROR READ', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  async function updateRow(panel) {
+    try {
+      const { txId, transId, amountDelta, balanceDelta } = readCommonInputs(panel);
+      const data = await api('update', {
+        txId,
+        transId,
+        amountDelta,
+        balanceDelta
+      });
+      log(panel, 'UPDATE trans_id=' + transId, data.result.op);
+    } catch (err) {
+      log(panel, 'ERROR UPDATE', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  async function deleteRow(panel) {
+    try {
+      const { txId, transId } = readCommonInputs(panel);
+      const data = await api('delete', { txId, transId });
+      log(panel, 'DELETE trans_id=' + transId, data.result.op);
+    } catch (err) {
+      log(panel, 'ERROR DELETE', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  async function commitTx(panel) {
+    try {
+      const txId = ensureTxId(panel);
+      const data = await api('commit', { txId });
+      log(panel, 'COMMIT', data.result);
+    } catch (err) {
+      log(panel, 'ERROR COMMIT', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  async function rollbackTx(panel) {
+    try {
+      const txId = ensureTxId(panel);
+      const data = await api('rollback', { txId });
+      log(panel, 'ROLLBACK', data.result);
+    } catch (err) {
+      log(panel, 'ERROR ROLLBACK', { error: err.message });
+      alert(err.message);
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

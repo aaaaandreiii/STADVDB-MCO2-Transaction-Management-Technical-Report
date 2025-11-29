@@ -1,0 +1,56 @@
+<%- include('partials/header') %>
+
+<section class="card">
+  <h2>
+    Local Transactions on Node <%= nodeId %> (<%= nodeRole %>)
+  </h2>
+
+  <p>
+    These rows come from this node's own <code>trans</code> table.
+    For the project:
+  </p>
+  <ul>
+    <li>Node 1 (central) should show all Transaction Types: Credit, Debit (Withdrawal), VYBER.</li>
+    <li>Node 2 should show only Transaction Type: Credit.</li>
+    <li>Node 3 should show only Transaction Type: Debit (Withdrawal), VYBER.</li>
+  </ul>
+
+  <% if (!rows || rows.length === 0) { %>
+    <p><em>No rows found on this node.</em></p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>trans_id</th>
+          <th>account_id</th>
+          <th>newdate</th>
+          <th>type</th>
+          <th>amount</th>
+          <th>balance</th>
+          <th>last_updated_by_node</th>
+          <th>version</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% rows.forEach(row => { %>
+          <tr>
+            <td><%= row.trans_id %></td>
+            <td><%= row.account_id %></td>
+            <td>
+              <%= row.newdate && row.newdate.toISOString
+                    ? row.newdate.toISOString().slice(0, 10)
+                    : row.newdate %>
+            </td>
+            <td><%= row.type %></td>
+            <td><%= row.amount %></td>
+            <td><%= row.balance %></td>
+            <td><%= row.last_updated_by_node %></td>
+            <td><%= row.version %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>
