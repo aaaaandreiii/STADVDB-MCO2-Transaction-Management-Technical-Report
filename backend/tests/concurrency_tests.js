@@ -17,7 +17,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = process.env.MCO2_BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.MCO2_BASE_URL || 'http://localhost:3001';
 const LOG_DIR = path.join(__dirname, '..', 'logs');
 const LOG_FILE = path.join(
   LOG_DIR,
@@ -42,8 +42,12 @@ function log(message, payload) {
 
 async function apiPost(path, body) {
   const url = `${BASE_URL}${path}`;
-  const res = await axios.post(url, body);
+  const res = await axios.post(url, body).catch(err => {
+    console.error('HTTP error', err.response?.status, err.response?.data);
+    throw err;
+  });
   const data = res.data;
+  console.log('API response', path, data);
   if (!data || data.ok !== true) {
     throw new Error((data && data.error) || `Request to ${path} failed`);
   }
