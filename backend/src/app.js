@@ -9,7 +9,7 @@ const concurrencyRoutes = require('./routes/concurrency');
 const txApiRoutes = require('./routes/txApi');
 const replicationApiRoutes = require('./routes/replication');
 const adminRoutes = require('./routes/admin');
-const replicationPageRoutes = require('./routes/replicationPage');
+const replicationPageRoutes = require('./routes/replication');
 
 const app = express();
 
@@ -25,6 +25,22 @@ app.use(
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
+
+hbs.registerHelper('nextSortDir', (currentBy, currentDir, column) => {
+  if (currentBy === column && currentDir === 'asc') {
+    return 'desc';
+  }
+  return 'asc';
+});
+
+hbs.registerHelper('sortIndicator', (currentBy, currentDir, column) => {
+  if (currentBy !== column) return '';
+  return currentDir === 'asc' ? '▲' : '▼';
+});
+
+hbs.registerHelper('encodeURIComponent', (str) => {
+  return encodeURIComponent(str || '');
+});
 
 // locals per-request so views know where they are running
 app.use((req, res, next) => {
