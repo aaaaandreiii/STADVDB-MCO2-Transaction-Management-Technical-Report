@@ -40,14 +40,13 @@ function getPool(nodeId = currentNodeId) {
 }
 
 //get the pool for a specific node
-function getPool(nodeId) {
-  const pool = pools[nodeId];
-  if (!pool) {
-    throw new Error(`No pool initialized for node ${nodeId}`);
-  }
-  return pool;
-}
-
+// function getPool(nodeId) {
+//   const pool = pools[nodeId];
+//   if (!pool) {
+//     throw new Error(`No pool initialized for node ${nodeId}`);
+//   }
+//   return pool;
+// }
 
 //acquire single connection
 //  run a function
