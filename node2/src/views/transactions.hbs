@@ -15,6 +15,37 @@
     <li>Node 3 should show only Transaction Type: Debit (Withdrawal), VYBER.</li>
   </ul>
 
+  <!-- Search bar -->
+  <div class="search-bar">
+    <form method="get" action="/transactions/local">
+      <label for="search">
+        Search:
+      </label>
+      <input
+        id="search"
+        name="search"
+        type="text"
+        placeholder="Search trans_id, account_id, date, type, amount..."
+        value="{{searchQuery}}"
+      />
+      <!-- Reset to page 1 when searching -->
+      <input type="hidden" name="page" value="1" />
+      <input type="hidden" name="pageSize" value="{{pageSize}}" />
+      <input type="hidden" name="sortBy" value="{{currentSortBy}}" />
+      <input type="hidden" name="sortDir" value="{{currentSortDir}}" />
+      <button type="submit">Search</button>
+
+      {{#if hasSearch}}
+        <a
+          href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}"
+          class="button-link"
+        >
+          Clear
+        </a>
+      {{/if}}
+    </form>
+  </div>
+
   <!-- pagination controls -->
   <div class="pagination-controls">
     <div class="page-size">
@@ -29,6 +60,9 @@
         </select>
         <!-- always reset to page 1 when changing page size -->
         <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="sortBy" value="{{../currentSortBy}}" />
+        <input type="hidden" name="sortDir" value="{{../currentSortDir}}" />
+        <input type="hidden" name="search" value="{{../searchQuery}}" />
       </form>
     </div>
 
@@ -43,28 +77,28 @@
 
     <div class="page-nav">
       <a
-        href="/transactions/local?page=1&pageSize={{pageSize}}"
+        href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
         class="page-button {{#if isFirstPage}}disabled{{/if}}"
       >
         « First
       </a>
 
       <a
-        href="/transactions/local?page={{prevPage}}&pageSize={{pageSize}}"
+        href="/transactions/local?page={{prevPage}}&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
         class="page-button {{#if isFirstPage}}disabled{{/if}}"
       >
         ‹ Prev
       </a>
 
       <a
-        href="/transactions/local?page={{nextPage}}&pageSize={{pageSize}}"
+        href="/transactions/local?page={{nextPage}}&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
         class="page-button {{#if isLastPage}}disabled{{/if}}"
       >
         Next ›
       </a>
 
       <a
-        href="/transactions/local?page={{totalPages}}&pageSize={{pageSize}}"
+        href="/transactions/local?page={{totalPages}}&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
         class="page-button {{#if isLastPage}}disabled{{/if}}"
       >
         Last »
@@ -76,14 +110,46 @@
     <table>
       <thead>
         <tr>
-          <th>trans_id</th>
-          <th>account_id</th>
-          <th>newdate</th>
-          <th>type</th>
-          <th>amount</th>
-          <th>balance</th>
-          <th>last_updated_by_node</th>
-          <th>version</th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=trans_id&sortDir={{nextSortDir currentSortBy currentSortDir 'trans_id'}}&search={{encodeURIComponent searchQuery}}">
+              trans_id {{sortIndicator currentSortBy currentSortDir 'trans_id'}}
+            </a>
+          </th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=account_id&sortDir={{nextSortDir currentSortBy currentSortDir 'account_id'}}&search={{encodeURIComponent searchQuery}}">
+              account_id {{sortIndicator currentSortBy currentSortDir 'account_id'}}
+            </a>
+          </th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=newdate&sortDir={{nextSortDir currentSortBy currentSortDir 'newdate'}}&search={{encodeURIComponent searchQuery}}">
+              newdate {{sortIndicator currentSortBy currentSortDir 'newdate'}}
+            </a>
+          </th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=type&sortDir={{nextSortDir currentSortBy currentSortDir 'type'}}&search={{encodeURIComponent searchQuery}}">
+              type {{sortIndicator currentSortBy currentSortDir 'type'}}
+            </a>
+          </th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=amount&sortDir={{nextSortDir currentSortBy currentSortDir 'amount'}}&search={{encodeURIComponent searchQuery}}">
+              amount {{sortIndicator currentSortBy currentSortDir 'amount'}}
+            </a>
+          </th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=balance&sortDir={{nextSortDir currentSortBy currentSortDir 'balance'}}&search={{encodeURIComponent searchQuery}}">
+              balance {{sortIndicator currentSortBy currentSortDir 'balance'}}
+            </a>
+          </th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=last_updated_by_node&sortDir={{nextSortDir currentSortBy currentSortDir 'last_updated_by_node'}}&search={{encodeURIComponent searchQuery}}">
+              last_updated_by_node {{sortIndicator currentSortBy currentSortDir 'last_updated_by_node'}}
+            </a>
+          </th>
+          <th>
+            <a href="/transactions/local?page=1&pageSize={{pageSize}}&sortBy=version&sortDir={{nextSortDir currentSortBy currentSortDir 'version'}}&search={{encodeURIComponent searchQuery}}">
+              version {{sortIndicator currentSortBy currentSortDir 'version'}}
+            </a>
+          </th>
         </tr>
       </thead>
       <tbody>

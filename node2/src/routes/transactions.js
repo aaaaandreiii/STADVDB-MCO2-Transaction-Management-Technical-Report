@@ -5,6 +5,21 @@ const { getPool, currentNodeId } = require('../db');
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 200;
 
+//allowed sortable columns
+const VALID_SORT_COLUMNS = [
+  'trans_id',
+  'account_id',
+  'newdate',
+  'type',
+  'amount',
+  'balance',
+  'last_updated_by_node',
+  'version'
+];
+
+const DEFAULT_SORT_BY = 'trans_id';
+const DEFAULT_SORT_DIR = 'asc';
+
 // show all transactions on the current node
 router.get('/local', async (req, res, next) => {
   let page = parseInt(req.query.page || '1', 10);
@@ -20,14 +35,48 @@ router.get('/local', async (req, res, next) => {
     pageSize = MAX_PAGE_SIZE;
   }
 
+  //sort
+  let sortBy = req.query.sortBy || DEFAULT_SORT_BY;
+  if (!VALID_SORT_COLUMNS.includes(sortBy)) {
+    sortBy = DEFAULT_SORT_BY;
+  }
+
+  let sortDir = (req.query.sortDir || DEFAULT_SORT_DIR).toLowerCase();
+  if (sortDir !== 'asc' && sortDir !== 'desc') {
+    sortDir = DEFAULT_SORT_DIR;
+  }
+  const sortDirSql = sortDir.toUpperCase();
+
+  //search
+  const search = (req.query.search || '').trim();
+  let whereSql = '';
+  let searchParams = [];
+
+  if (search) {
+    const like = `%${search}%`;
+    //search across id, account, date (YYYY-MM-DD), type, amount, balance, last_updated_by_node, version
+    searchParams = [like, like, like, like, like, like, like, like];
+    whereSql = `
+      WHERE
+        CAST(trans_id AS CHAR) LIKE ?
+        OR CAST(account_id AS CHAR) LIKE ?
+        OR DATE_FORMAT(newdate, '%Y-%m-%d') LIKE ?
+        OR type LIKE ?
+        OR CAST(amount AS CHAR) LIKE ?
+        OR CAST(balance AS CHAR) LIKE ?
+        OR CAST(last_updated_by_node AS CHAR) LIKE ?
+        OR CAST(version AS CHAR) LIKE ?
+    `;
+  }
+
   try {
     const pool = getPool(currentNodeId);
 
     // total count to compute total pages
-    const [[{ count }]] = await pool.query(
-      'SELECT COUNT(*) AS count FROM trans'
-    );
+    const countSql = `SELECT COUNT(*) AS count FROM trans ${whereSql}`;
+    const [[{ count }]] = await pool.query(countSql, searchParams);
     const totalCount = count;
+
     const totalPages =
       totalCount === 0 ? 1 : Math.max(Math.ceil(totalCount / pageSize), 1);
 
@@ -39,10 +88,20 @@ router.get('/local', async (req, res, next) => {
     const offset = (page - 1) * pageSize;
 
     // fetch current page rows
-    const [rowsRaw] = await pool.query(
-      'SELECT * FROM trans ORDER BY trans_id ASC LIMIT ? OFFSET ?',
-      [pageSize, offset]
-    );
+    const rowsSql = `
+      SELECT *
+      FROM trans
+      ${whereSql}
+      ORDER BY ${sortBy} ${sortDirSql}
+      LIMIT ?
+      OFFSET ?
+    `;
+
+    const rowsParams = search
+      ? [...searchParams, pageSize, offset]
+      : [pageSize, offset];
+
+    const [rowsRaw] = await pool.query(rowsSql, rowsParams);
 
     // format date for display (Handlebars can't call toISOString())
     const rows = rowsRaw.map((row) => ({
@@ -77,7 +136,13 @@ router.get('/local', async (req, res, next) => {
       pageSizeOptions,
       isFirstPage: page === 1,
       isLastPage: page === totalPages,
-      hasRows: rows.length > 0
+      hasRows: rows.length > 0,
+
+      // sorting + search stuff
+      currentSortBy: sortBy,
+      currentSortDir: sortDir, // asc/desc
+      searchQuery: search,
+      hasSearch: !!search
     });
   } catch (err) {
     next(err);
