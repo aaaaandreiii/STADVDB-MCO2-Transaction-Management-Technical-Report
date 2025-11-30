@@ -145,20 +145,20 @@
 </section>
 
 <section class="card">
-  <h3>How to use this for your report</h3>
+  <h3>How to use:</h3>
   <ol>
     <li>
-      Choose isolation levels for Tx A and Tx B (e.g., both READ COMMITTED).
+      Start transaction A\&/B
     </li>
     <li>
-      Start both transactions on the same row (e.g., <code>trans_id = 1</code>).
+      Row-Level Opoerations: Set both transactions to same row (ex: both <code>trans_id = 1</code>).
     </li>
     <li>
-      Use READ/UPDATE/COMMIT in different orders to see anomalies
+      Use READ/UPDATE/COMMIT in different orders
       (dirty reads, non-repeatable reads, lost updates).
     </li>
     <li>
-      Capture screenshots and logs for your technical report.
+      Log
     </li>
   </ol>
 </section>
@@ -190,7 +190,8 @@
     if (payload !== undefined) {
       line += '\n  ' + JSON.stringify(payload, null, 2);
     }
-    logEl.textContent += line + '\n';
+    //logEl.textContent += line + '\n' + logEl.textContent;
+    logEl.textContent = line + '\n' + logEl.textContent; //log updates appear at top instead of bottom
     logEl.scrollTop = logEl.scrollHeight;
   }
 
