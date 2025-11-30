@@ -1,4 +1,4 @@
-<%- include('partials/header') %>
+{{> header}}
 
 <section class="card">
   <h2>Replication Dashboard</h2>
@@ -28,15 +28,16 @@
       </tr>
     </thead>
     <tbody id="replication-node-status-body">
-      <% nodes.forEach((n) => { const s = status[n.id] || { online: true }; %>
-        <tr data-node-id="<%= n.id %>">
-          <td>Node <%= n.id %></td>
-          <td><%= n.role %></td>
+      {{!-- Assumes each node has: id, role, online --}}
+      {{#each nodes}}
+        <tr data-node-id="{{id}}">
+          <td>Node {{id}}</td>
+          <td>{{role}}</td>
           <td class="node-status">
-            <%= s.online ? 'ONLINE' : 'OFFLINE' %>
+            {{#if online}}ONLINE{{else}}OFFLINE{{/if}}
           </td>
         </tr>
-      <% }); %>
+      {{/each}}
     </tbody>
   </table>
   <p>
@@ -52,22 +53,22 @@
   <div class="field-group">
     <label for="sourceNodeId">Source node:</label>
     <select id="sourceNodeId">
-      <% nodes.forEach((n) => { %>
-        <option value="<%= n.id %>">
-          Node <%= n.id %> (<%= n.role %>)
+      {{#each nodes}}
+        <option value="{{id}}">
+          Node {{id}} ({{role}})
         </option>
-      <% }); %>
+      {{/each}}
     </select>
   </div>
 
   <div class="field-group">
     <label for="targetNodeId">Target node:</label>
     <select id="targetNodeId">
-      <% nodes.forEach((n) => { %>
-        <option value="<%= n.id %>">
-          Node <%= n.id %> (<%= n.role %>)
+      {{#each nodes}}
+        <option value="{{id}}">
+          Node {{id}} ({{role}})
         </option>
-      <% }); %>
+      {{/each}}
     </select>
   </div>
 
@@ -92,9 +93,9 @@
     const ts = new Date().toISOString();
     let line = '[' + ts + '] ' + message;
     if (payload !== undefined) {
-      line += '\\n  ' + JSON.stringify(payload, null, 2);
+      line += '\n  ' + JSON.stringify(payload, null, 2);
     }
-    logEl.textContent += line + '\\n';
+    logEl.textContent += line + '\n';
     logEl.scrollTop = logEl.scrollHeight;
   }
 
@@ -159,4 +160,4 @@
   });
 </script>
 
-<%- include('partials/footer') %>
+{{> footer}}
