@@ -1,0 +1,108 @@
+{{> header}}
+
+<section class="card">
+  <h2>Admin / Failure Simulation Panel</h2>
+  <p>
+    Use this page to mark nodes <strong>online</strong> or <strong>offline</strong>.
+    The in-memory status is used to:
+  </p>
+  <ul>
+    <li>Block new transactions on offline nodes.</li>
+    <li>Cause replication to skip or fail when a target node is offline.</li>
+  </ul>
+  <p>
+    This is how you will demonstrate crash and recovery scenarios for the report.
+  </p>
+</section>
+
+<section class="card">
+  <h3>Node Statuses</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Node</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="nodes-table-body">
+      {{#each nodes}}
+        {{#with (lookup ../status id)}}
+          <tr data-node-id="{{../id}}">
+            <td>Node {{../id}}</td>
+            <td>{{../role}}</td>
+            <td class="node-status">
+              {{#if online}}ONLINE{{else}}OFFLINE{{/if}}
+            </td>
+            <td>
+              <button type="button" onclick="setNodeOnline({{../id}}, true)">
+                Set ONLINE
+              </button>
+              <button type="button" onclick="setNodeOnline({{../id}}, false)">
+                Set OFFLINE
+              </button>
+            </td>
+          </tr>
+        {{/with}}
+      {{/each}}
+    </tbody>
+  </table>
+
+  <p>
+    Status is shared by all features on this app instance (transactions, replication).
+    Changing it here is equivalent to simulating a node crash or recovery.
+  </p>
+
+  <button type="button" onclick="refreshStatuses()">
+    Refresh Statuses
+  </button>
+</section>
+
+<script>
+  async function fetchJson(url, options) {
+    const res = await fetch(url, options || {});
+    const data = await res.json();
+    if (!data.ok) {
+      throw new Error(data.error || 'Unknown error');
+    }
+    return data;
+  }
+
+  async function refreshStatuses() {
+    try {
+      const data = await fetchJson('/admin/node-status');
+      const status = data.status || {};
+      const tbody = document.getElementById('nodes-table-body');
+      Array.from(tbody.querySelectorAll('tr')).forEach((row) => {
+        const nodeId = parseInt(row.getAttribute('data-node-id'), 10);
+        const s = status[nodeId] || { online: true };
+        const statusCell = row.querySelector('.node-status');
+        statusCell.textContent = s.online ? 'ONLINE' : 'OFFLINE';
+      });
+    } catch (err) {
+      alert('Failed to refresh node statuses: ' + err.message);
+    }
+  }
+
+  async function setNodeOnline(nodeId, online) {
+    try {
+      await fetchJson('/admin/node-status/' + nodeId, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ online })
+      });
+      await refreshStatuses();
+    } catch (err) {
+      alert('Failed to update node status: ' + err.message);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshStatuses().catch((err) => console.error(err));
+  });
+</script>
+
+{{> footer}}

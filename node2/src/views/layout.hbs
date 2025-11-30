@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>STADVDB MCO2 - Node {{nodeId}} ({{nodeRole}})</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body> 
+  {{!-- <header> 
+    <h1>STADVDB MCO2 - Distributed DB Demo</h1>
+    <p>
+      You are connected to
+      <strong>Node {{nodeId}} ({{nodeRole}})</strong>
+    </p>
+    <nav>
+      <a href="/">Home |</a>
+      <a href="/transactions/local">Local Fragment |</a>
+    </nav>
+  </header> --}}
+
+  <main>
+    {{{body}}}
+  </main>
+
+  {{!-- <footer>
+    <small>
+      Same app codebase deployed on all 3 nodes.
+      Node ID is determined by <code>NODE_ID</code> in the environment.
+    </small>
+  </footer> --}}
+</body>
+</html>
