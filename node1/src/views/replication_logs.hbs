@@ -1,0 +1,184 @@
+{{!-- === src/views/replication_logs.hbs === --}}
+<section class="card">
+  <h2>
+    Replication Logs on Node {{nodeId}} ({{nodeRole}})
+  </h2>
+
+  <p>
+    These rows come from this node's <code>replication_log</code> table.
+  </p>
+  <ul>
+    <li>Each row is an INSERT / UPDATE / DELETE event to be replicated.</li>
+    <li>
+      <code>applied = 0</code> means the event has not yet been applied on the target node.
+    </li>
+    <li>
+      <code>applied = 1</code> means it has already been applied
+      (see <code>applied_at</code> timestamp).
+    </li>
+  </ul>
+</section>
+
+<section class="card">
+  <!-- Search bar -->
+  <div class="search-bar">
+    <form method="get" action="/replication/logs">
+      <label for="search">
+        Search:
+      </label>
+      <input
+        id="search"
+        name="search"
+        type="text"
+        placeholder="Search id, trans_id, source_node, target_node, op_type..."
+        value="{{searchQuery}}"
+      />
+      <input type="hidden" name="page" value="1" />
+      <input type="hidden" name="pageSize" value="{{pageSize}}" />
+      <input type="hidden" name="sortBy" value="{{currentSortBy}}" />
+      <input type="hidden" name="sortDir" value="{{currentSortDir}}" />
+      <button type="submit">Search</button>
+
+      {{#if hasSearch}}
+        <a
+          href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}"
+          class="button-link"
+        >
+          Clear
+        </a>
+      {{/if}}
+    </form>
+  </div>
+
+  <!-- pagination controls -->
+  <div class="pagination-controls">
+    <div class="page-size">
+      <form method="get" action="/replication/logs">
+        <label for="pageSize">
+          Rows per page:
+        </label>
+        <select id="pageSize" name="pageSize" onchange="this.form.submit()">
+          {{#each pageSizeOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{value}}</option>
+          {{/each}}
+        </select>
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="sortBy" value="{{../currentSortBy}}" />
+        <input type="hidden" name="sortDir" value="{{../currentSortDir}}" />
+        <input type="hidden" name="search" value="{{../searchQuery}}" />
+      </form>
+    </div>
+
+    <div class="page-info">
+      <span>
+        Page <strong>{{page}}</strong> of <strong>{{totalPages}}</strong>
+        &mdash;
+        Showing <strong>{{startRow}}</strong>–<strong>{{endRow}}</strong>
+        of <strong>{{totalCount}}</strong> rows
+      </span>
+    </div>
+
+    <div class="page-nav">
+      <a
+        href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
+        class="page-button {{#if isFirstPage}}disabled{{/if}}"
+      >
+        « First
+      </a>
+
+      <a
+        href="/replication/logs?page={{prevPage}}&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
+        class="page-button {{#if isFirstPage}}disabled{{/if}}"
+      >
+        ‹ Prev
+      </a>
+
+      <a
+        href="/replication/logs?page={{nextPage}}&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
+        class="page-button {{#if isLastPage}}disabled{{/if}}"
+      >
+        Next ›
+      </a>
+
+      <a
+        href="/replication/logs?page={{totalPages}}&pageSize={{pageSize}}&sortBy={{currentSortBy}}&sortDir={{currentSortDir}}&search={{encodeURIComponent searchQuery}}"
+        class="page-button {{#if isLastPage}}disabled{{/if}}"
+      >
+        Last »
+      </a>
+    </div>
+  </div>
+
+  {{#if hasRows}}
+    <table>
+      <thead>
+        <tr>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=id&sortDir={{nextSortDir currentSortBy currentSortDir 'id'}}&search={{encodeURIComponent searchQuery}}">
+              id {{sortIndicator currentSortBy currentSortDir 'id'}}
+            </a>
+          </th>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=source_node&sortDir={{nextSortDir currentSortBy currentSortDir 'source_node'}}&search={{encodeURIComponent searchQuery}}">
+              source_node {{sortIndicator currentSortBy currentSortDir 'source_node'}}
+            </a>
+          </th>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=target_node&sortDir={{nextSortDir currentSortBy currentSortDir 'target_node'}}&search={{encodeURIComponent searchQuery}}">
+              target_node {{sortIndicator currentSortBy currentSortDir 'target_node'}}
+            </a>
+          </th>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=trans_id&sortDir={{nextSortDir currentSortBy currentSortDir 'trans_id'}}&search={{encodeURIComponent searchQuery}}">
+              trans_id {{sortIndicator currentSortBy currentSortDir 'trans_id'}}
+            </a>
+          </th>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=op_type&sortDir={{nextSortDir currentSortBy currentSortDir 'op_type'}}&search={{encodeURIComponent searchQuery}}">
+              op_type {{sortIndicator currentSortBy currentSortDir 'op_type'}}
+            </a>
+          </th>
+          <th>amount_before</th>
+          <th>balance_before</th>
+          <th>amount_after</th>
+          <th>balance_after</th>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=created_at&sortDir={{nextSortDir currentSortBy currentSortDir 'created_at'}}&search={{encodeURIComponent searchQuery}}">
+              created_at {{sortIndicator currentSortBy currentSortDir 'created_at'}}
+            </a>
+          </th>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=applied&sortDir={{nextSortDir currentSortBy currentSortDir 'applied'}}&search={{encodeURIComponent searchQuery}}">
+              applied {{sortIndicator currentSortBy currentSortDir 'applied'}}
+            </a>
+          </th>
+          <th>
+            <a href="/replication/logs?page=1&pageSize={{pageSize}}&sortBy=applied_at&sortDir={{nextSortDir currentSortBy currentSortDir 'applied_at'}}&search={{encodeURIComponent searchQuery}}">
+              applied_at {{sortIndicator currentSortBy currentSortDir 'applied_at'}}
+            </a>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each rows}}
+          <tr>
+            <td>{{id}}</td>
+            <td>{{source_node}}</td>
+            <td>{{target_node}}</td>
+            <td>{{trans_id}}</td>
+            <td>{{op_type}}</td>
+            <td>{{amount_before}}</td>
+            <td>{{balance_before}}</td>
+            <td>{{amount_after}}</td>
+            <td>{{balance_after}}</td>
+            <td>{{createdAtFormatted}}</td>
+            <td>{{applied}}</td>
+            <td>{{appliedAtFormatted}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+    <p><em>No replication_log rows found on this node.</em></p>
+  {{/if}}
+</section>
