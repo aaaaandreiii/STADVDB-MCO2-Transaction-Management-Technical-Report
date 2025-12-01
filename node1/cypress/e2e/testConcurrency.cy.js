@@ -16,26 +16,28 @@ describe("MCO2 Distributed Database Concurrency and Recovery", () => {
             it("Case 1: Concurrent Reads on same item", () => {
                 cy.log("Testing concurrent READS...");
 
-                cy.visit(NODE1 + '/concurrency')
-                // cy.contains('a', 'Concurrency Demo').click();
-                // cy.get('#txA-node').select('Node 2 (fragment)').trigger('change');
-                // cy.get('#txA-iso').select(`${level}`).trigger('change');
-                cy.request({
-                    method: 'POST',
-                    url: `${NODE1}api/tx/start`,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Referer': `${NODE1}/concurrency/`
-                    },
-                    body: {
-                        node: 2,
-                        isolation: level
-                    }
-                }).then((res) => {
-                    expect(res.status).to.eq(200);
-                });
+                // cy.visit(NODE1 + '/concurrency')
+                cy.visit(NODE1)
+                cy.contains('a', 'Concurrency Demo').click();
+                // cy.get('#txA-node').select('Node 2 (fragment)');
+                // cy.get('#txA-iso').select(`${level}`);
+                // cy.request({
+                //     method: 'POST',
+                //     url: `${NODE1}api/tx/start`,
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'Referer': `${NODE1}/concurrency/`
+                //     },
+                //     body: {
+                //         node: 2,
+                //         isolation: level
+                //     }
+                // }).then((res) => {
+                //     expect(res.status).to.eq(200);
+                // });
 
-                cy.wait(15)
+                // cy.wait(15)
+                cy.contains('button', 'Start Tx A').click();
                 cy.contains('button', 'READ').click();
                 // select node
                 // select isolation level
