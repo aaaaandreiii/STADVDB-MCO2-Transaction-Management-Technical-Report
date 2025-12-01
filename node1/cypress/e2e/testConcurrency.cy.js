@@ -3,10 +3,10 @@ const NODE2 = "http://ccscloud.dlsu.edu.ph:60116/";
 const NODE3 = "http://ccscloud.dlsu.edu.ph:60117/";
 
 const ISOLATION_LEVELS = [
-    "READ UNCOMMITTED"
-    // "READ COMMITTED",
-    // "REPEATABLE READ",
-    // "SERIALIZABLE"
+    "READ UNCOMMITTED",
+    "READ COMMITTED",
+    "REPEATABLE READ",
+    "SERIALIZABLE"
 ];
 
 describe("MCO2 Distributed Database Concurrency and Recovery", () => {
