@@ -20,6 +20,12 @@ async function initPools() {
       connectionLimit: 10,
       queueLimit: 0
     });
+    
+    console.log("Host", config.host)
+    console.log("Port", config.port)
+    console.log("User", config.user)
+    console.log("Password", config.password)
+    console.log("Database", config.database)
   }
 
   console.log(
