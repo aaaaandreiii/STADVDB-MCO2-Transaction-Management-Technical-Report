@@ -1,0 +1,331 @@
+<section class="card">
+  <h2>Transactions CRUD Playground</h2>
+  <p>
+    Use this page for simple <strong>Create / Read / Update / Delete</strong> operations
+    on the <code>trans</code> table via the application Tx manager.
+  </p>
+  <ul>
+    <li><strong>INSERT</strong> uses a short transaction internally.</li>
+    <li><strong>READ/UPDATE/DELETE</strong> run in short transactions with isolation level <code>READ COMMITTED</code>.</li>
+    <li>All operations go through the same logic used by the concurrency and replication demos.</li>
+  </ul>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h3>Create (INSERT)</h3>
+
+    <div class="field-group">
+      <label>Node:</label>
+      <select id="crud-insert-node">
+        {{#each nodes}}
+          <option value="{{id}}">
+            Node {{id}} ({{role}})
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>Account ID:</label>
+      <input id="crud-insert-accountId" type="number" min="1" />
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>Date:</label>
+      <input id="crud-insert-newdate" type="date" />
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>Type:</label>
+      <select id="crud-insert-type">
+        <option value="Credit">Credit</option>
+        <option value="Debit (Withdrawal)">Debit (Withdrawal)</option>
+        <option value="VYBER">VYBER</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>Amount:</label>
+      <input id="crud-insert-amount" type="number" step="0.01" />
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>Balance:</label>
+      <input id="crud-insert-balance" type="number" step="0.01" />
+    </div>
+
+    <div class="buttons">
+      <br>
+      <button type="button" onclick="doInsert()">Insert row</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Read (SELECT by trans_id)</h3>
+
+    <div class="field-group">
+      <label>Node:</label>
+      <select id="crud-read-node">
+        {{#each nodes}}
+          <option value="{{id}}">
+            Node {{id}} ({{role}})
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>trans_id:</label>
+      <input id="crud-read-transId" type="number" min="1" />
+    </div>
+
+    <div class="buttons">
+      <br>
+      <button type="button" onclick="doRead()">Read row</button>
+    </div>
+  </div>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h3>Update</h3>
+
+    <div class="field-group">
+      <label>Node:</label>
+      <select id="crud-update-node">
+        {{#each nodes}}
+          <option value="{{id}}">
+            Node {{id}} ({{role}})
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>trans_id:</label>
+      <input id="crud-update-transId" type="number" min="1" />
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>amount Δ:</label>
+      <input id="crud-update-amountDelta" type="number" step="0.01" value="100" />
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>balance Δ:</label>
+      <input id="crud-update-balanceDelta" type="number" step="0.01" value="100" />
+    </div>
+
+    <div class="buttons">
+      <br>
+      <button type="button" onclick="doUpdate()">Update row</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Delete</h3>
+
+    <div class="field-group">
+      <label>Node:</label>
+      <select id="crud-delete-node">
+        {{#each nodes}}
+          <option value="{{id}}">
+            Node {{id}} ({{role}})
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="field-group">
+      <br>
+      <label>trans_id:</label>
+      <input id="crud-delete-transId" type="number" min="1" />
+    </div>
+
+    <div class="buttons">
+      <br>
+      <button type="button" onclick="doDelete()">Delete row</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h3>Operation log</h3>
+  <p>
+    These logs show the JSON responses from the <code>/api/tx</code> endpoints.
+  </p>
+  <pre id="crud-log" class="log"></pre>
+</section>
+
+<script>
+  async function api(path, body) {
+    const res = await fetch('/api/tx/' + path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body || {})
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      throw new Error(data.error || 'Unknown error');
+    }
+    return data;
+  }
+
+  function getEl(id) {
+    return document.getElementById(id);
+  }
+
+  function log(message, payload) {
+    const logEl = getEl('crud-log');
+    const ts = new Date().toISOString();
+    let line = '[' + ts + '] ' + message;
+    if (payload !== undefined) {
+      line += '\n  ' + JSON.stringify(payload, null, 2);
+    }
+    logEl.textContent = line + '\n' + logEl.textContent;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  async function doInsert() {
+    try {
+      const nodeId = getEl('crud-insert-node').value;
+      const accountId = getEl('crud-insert-accountId').value;
+      const newdate = getEl('crud-insert-newdate').value;
+      const type = getEl('crud-insert-type').value;
+      const amount = getEl('crud-insert-amount').value;
+      const balance = getEl('crud-insert-balance').value;
+
+      const data = await api('insert', {
+        nodeId,
+        accountId,
+        newdate,
+        type,
+        amount,
+        balance
+      });
+
+      log('INSERT', data.result);
+      alert('Inserted trans_id = ' + data.result.transId);
+    } catch (err) {
+      log('ERROR INSERT', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  async function doRead() {
+    try {
+      const nodeId = getEl('crud-read-node').value;
+      const transId = getEl('crud-read-transId').value;
+
+      const start = await api('start', {
+        nodeId,
+        isolationLevel: 'READ COMMITTED',
+        description: 'CRUD READ'
+      });
+
+      const txId = start.tx.txId;
+
+      try {
+        const read = await api('read', { txId, transId });
+        log('READ trans_id=' + transId, read.result.row);
+      } finally {
+        try {
+          await api('rollback', { txId });
+        } catch (e) {
+          console.error('Rollback after READ failed', e);
+        }
+      }
+    } catch (err) {
+      log('ERROR READ', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  async function doUpdate() {
+    try {
+      const nodeId = getEl('crud-update-node').value;
+      const transId = getEl('crud-update-transId').value;
+      const amountDelta = getEl('crud-update-amountDelta').value;
+      const balanceDelta = getEl('crud-update-balanceDelta').value;
+
+      const start = await api('start', {
+        nodeId,
+        isolationLevel: 'READ COMMITTED',
+        description: 'CRUD UPDATE'
+      });
+
+      const txId = start.tx.txId;
+      try {
+        const upd = await api('update', {
+          txId,
+          transId,
+          amountDelta,
+          balanceDelta
+        });
+
+        const commit = await api('commit', { txId });
+
+        log('UPDATE trans_id=' + transId, {
+          op: upd.result.op,
+          commit: commit.result
+        });
+      } catch (err) {
+        try {
+          await api('rollback', { txId });
+        } catch (e) {
+          console.error('Rollback after UPDATE failed', e);
+        }
+        throw err;
+      }
+    } catch (err) {
+      log('ERROR UPDATE', { error: err.message });
+      alert(err.message);
+    }
+  }
+
+  async function doDelete() {
+    try {
+      const nodeId = getEl('crud-delete-node').value;
+      const transId = getEl('crud-delete-transId').value;
+
+      const start = await api('start', {
+        nodeId,
+        isolationLevel: 'READ COMMITTED',
+        description: 'CRUD DELETE'
+      });
+
+      const txId = start.tx.txId;
+      try {
+        const del = await api('delete', { txId, transId });
+        const commit = await api('commit', { txId });
+
+        log('DELETE trans_id=' + transId, {
+          op: del.result.op,
+          commit: commit.result
+        });
+      } catch (err) {
+        try {
+          await api('rollback', { txId });
+        } catch (e) {
+          console.error('Rollback after DELETE failed', e);
+        }
+        throw err;
+      }
+    } catch (err) {
+      log('ERROR DELETE', { error: err.message });
+      alert(err.message);
+    }
+  }
+</script>
