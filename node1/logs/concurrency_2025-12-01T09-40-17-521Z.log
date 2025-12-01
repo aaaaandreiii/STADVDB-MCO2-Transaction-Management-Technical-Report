@@ -1,0 +1,170 @@
+[2025-12-01T09:40:17.521Z] --- Starting concurrency tests --- {"BASE_URL":"http://localhost:3001"}
+[2025-12-01T09:40:17.522Z] === Case #1: read-read === {"isolationLevel":"READ UNCOMMITTED","runNo":1}
+[2025-12-01T09:40:28.242Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:40:28.243Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:40:28.371Z] === Case #2: write + read === {"isolationLevel":"READ UNCOMMITTED","runNo":1}
+[2025-12-01T09:40:28.680Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:41:18.765Z] Case2 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:41:18.887Z] === Case #3: write-write === {"isolationLevel":"READ UNCOMMITTED","runNo":1}
+[2025-12-01T09:41:19.217Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:41:19.217Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:42:09.265Z] Case3 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:42:09.343Z] === Case #1: read-read === {"isolationLevel":"READ UNCOMMITTED","runNo":2}
+[2025-12-01T09:42:09.537Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:42:09.537Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:42:09.614Z] === Case #2: write + read === {"isolationLevel":"READ UNCOMMITTED","runNo":2}
+[2025-12-01T09:42:09.803Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:42:59.952Z] Case2 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:43:00.037Z] === Case #3: write-write === {"isolationLevel":"READ UNCOMMITTED","runNo":2}
+[2025-12-01T09:43:00.269Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:43:00.269Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:43:50.328Z] Case3 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:43:50.420Z] === Case #1: read-read === {"isolationLevel":"READ UNCOMMITTED","runNo":3}
+[2025-12-01T09:43:50.607Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:43:50.607Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:43:50.681Z] === Case #2: write + read === {"isolationLevel":"READ UNCOMMITTED","runNo":3}
+[2025-12-01T09:43:50.866Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:44:41.020Z] Case2 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:44:41.097Z] === Case #3: write-write === {"isolationLevel":"READ UNCOMMITTED","runNo":3}
+[2025-12-01T09:44:41.327Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:44:41.327Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:45:31.395Z] Case3 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:45:31.512Z] === Case #1: read-read === {"isolationLevel":"READ COMMITTED","runNo":1}
+[2025-12-01T09:45:31.789Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:45:31.789Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:45:31.902Z] === Case #2: write + read === {"isolationLevel":"READ COMMITTED","runNo":1}
+[2025-12-01T09:45:32.177Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:46:22.229Z] Case2 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:46:22.312Z] === Case #3: write-write === {"isolationLevel":"READ COMMITTED","runNo":1}
+[2025-12-01T09:46:22.544Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:46:22.544Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:47:12.602Z] Case3 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:47:12.687Z] === Case #1: read-read === {"isolationLevel":"READ COMMITTED","runNo":2}
+[2025-12-01T09:47:12.880Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:47:12.880Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:47:12.960Z] === Case #2: write + read === {"isolationLevel":"READ COMMITTED","runNo":2}
+[2025-12-01T09:47:13.150Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:47:46.372Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:46.370Z","amountBefore":1890,"balanceBefore":1890,"amountAfter":1900,"balanceAfter":1900}
+[2025-12-01T09:47:46.412Z] Case2 TxB read before A commit {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1890,"balance":1890,"last_updated_at":"2025-11-29T18:23:25.000Z","last_updated_by_node":1,"version":68}
+[2025-12-01T09:47:46.471Z] Case2 TxA COMMIT {"txId":"tx-1764582433034-132229","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:46.470Z"}
+[2025-12-01T09:47:46.512Z] Case2 TxB second read after A commit (same TxB) {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1900,"balance":1900,"last_updated_at":"2025-12-01T01:47:46.000Z","last_updated_by_node":1,"version":69}
+[2025-12-01T09:47:46.552Z] Case2 TxB COMMIT {"txId":"tx-1764582433110-448395","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:46.551Z"}
+[2025-12-01T09:47:46.552Z] === Case #3: write-write === {"isolationLevel":"READ COMMITTED","runNo":2}
+[2025-12-01T09:47:46.783Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1900,"balance":1900,"last_updated_at":"2025-12-01T01:47:46.000Z","last_updated_by_node":1,"version":69}
+[2025-12-01T09:47:46.783Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1900,"balance":1900,"last_updated_at":"2025-12-01T01:47:46.000Z","last_updated_by_node":1,"version":69}
+[2025-12-01T09:47:46.900Z] Case3 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:46.899Z","amountBefore":1900,"balanceBefore":1900,"amountAfter":1910,"balanceAfter":1910}
+[2025-12-01T09:47:46.901Z] Case3 TxB UPDATE sent (may block on lock)...
+[2025-12-01T09:47:47.145Z] Case3 TxA COMMIT {"txId":"tx-1764582466627-284290","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:47.144Z"}
+[2025-12-01T09:47:47.219Z] Case3 TxB UPDATE completed after A commit {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:47.218Z","amountBefore":1910,"balanceBefore":1910,"amountAfter":1930,"balanceAfter":1930}
+[2025-12-01T09:47:47.260Z] Case3 TxB COMMIT {"txId":"tx-1764582466702-288876","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:47.259Z"}
+[2025-12-01T09:47:47.374Z] Case3 final value after both commits {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1930,"balance":1930,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":71}
+[2025-12-01T09:47:47.413Z] === Case #1: read-read === {"isolationLevel":"READ COMMITTED","runNo":3}
+[2025-12-01T09:47:47.603Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1930,"balance":1930,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":71}
+[2025-12-01T09:47:47.603Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1930,"balance":1930,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":71}
+[2025-12-01T09:47:47.680Z] === Case #2: write + read === {"isolationLevel":"READ COMMITTED","runNo":3}
+[2025-12-01T09:47:47.873Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1930,"balance":1930,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":71}
+[2025-12-01T09:47:47.986Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:47.984Z","amountBefore":1930,"balanceBefore":1930,"amountAfter":1940,"balanceAfter":1940}
+[2025-12-01T09:47:48.025Z] Case2 TxB read before A commit {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1930,"balance":1930,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":71}
+[2025-12-01T09:47:48.066Z] Case2 TxA COMMIT {"txId":"tx-1764582467757-625312","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:48.064Z"}
+[2025-12-01T09:47:48.106Z] Case2 TxB second read after A commit (same TxB) {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1940,"balance":1940,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":72}
+[2025-12-01T09:47:48.146Z] Case2 TxB COMMIT {"txId":"tx-1764582467832-124829","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:48.144Z"}
+[2025-12-01T09:47:48.146Z] === Case #3: write-write === {"isolationLevel":"READ COMMITTED","runNo":3}
+[2025-12-01T09:47:48.375Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1940,"balance":1940,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":72}
+[2025-12-01T09:47:48.375Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1940,"balance":1940,"last_updated_at":"2025-12-01T01:47:47.000Z","last_updated_by_node":1,"version":72}
+[2025-12-01T09:47:48.486Z] Case3 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:48.485Z","amountBefore":1940,"balanceBefore":1940,"amountAfter":1950,"balanceAfter":1950}
+[2025-12-01T09:47:48.487Z] Case3 TxB UPDATE sent (may block on lock)...
+[2025-12-01T09:47:48.729Z] Case3 TxA COMMIT {"txId":"tx-1764582468220-87535","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:48.728Z"}
+[2025-12-01T09:47:48.805Z] Case3 TxB UPDATE completed after A commit {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:48.803Z","amountBefore":1950,"balanceBefore":1950,"amountAfter":1970,"balanceAfter":1970}
+[2025-12-01T09:47:48.846Z] Case3 TxB COMMIT {"txId":"tx-1764582468296-155188","nodeId":1,"isolationLevel":"READ COMMITTED","status":"committed","finishedAt":"2025-12-01T09:47:48.844Z"}
+[2025-12-01T09:47:48.960Z] Case3 final value after both commits {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1970,"balance":1970,"last_updated_at":"2025-12-01T01:47:48.000Z","last_updated_by_node":1,"version":74}
+[2025-12-01T09:47:49.001Z] === Case #1: read-read === {"isolationLevel":"REPEATABLE READ","runNo":1}
+[2025-12-01T09:47:49.195Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1970,"balance":1970,"last_updated_at":"2025-12-01T01:47:48.000Z","last_updated_by_node":1,"version":74}
+[2025-12-01T09:47:49.195Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1970,"balance":1970,"last_updated_at":"2025-12-01T01:47:48.000Z","last_updated_by_node":1,"version":74}
+[2025-12-01T09:47:49.276Z] === Case #2: write + read === {"isolationLevel":"REPEATABLE READ","runNo":1}
+[2025-12-01T09:47:49.469Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1970,"balance":1970,"last_updated_at":"2025-12-01T01:47:48.000Z","last_updated_by_node":1,"version":74}
+[2025-12-01T09:47:49.582Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:49.580Z","amountBefore":1970,"balanceBefore":1970,"amountAfter":1980,"balanceAfter":1980}
+[2025-12-01T09:47:49.623Z] Case2 TxB read before A commit {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1970,"balance":1970,"last_updated_at":"2025-12-01T01:47:48.000Z","last_updated_by_node":1,"version":74}
+[2025-12-01T09:47:49.679Z] Case2 TxA COMMIT {"txId":"tx-1764582469350-341013","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:49.678Z"}
+[2025-12-01T09:47:49.720Z] Case2 TxB second read after A commit (same TxB) {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1970,"balance":1970,"last_updated_at":"2025-12-01T01:47:48.000Z","last_updated_by_node":1,"version":74}
+[2025-12-01T09:47:49.760Z] Case2 TxB COMMIT {"txId":"tx-1764582469427-371300","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:49.758Z"}
+[2025-12-01T09:47:49.760Z] === Case #3: write-write === {"isolationLevel":"REPEATABLE READ","runNo":1}
+[2025-12-01T09:47:49.989Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1980,"balance":1980,"last_updated_at":"2025-12-01T01:47:49.000Z","last_updated_by_node":1,"version":75}
+[2025-12-01T09:47:49.989Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":1980,"balance":1980,"last_updated_at":"2025-12-01T01:47:49.000Z","last_updated_by_node":1,"version":75}
+[2025-12-01T09:47:50.103Z] Case3 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:50.102Z","amountBefore":1980,"balanceBefore":1980,"amountAfter":1990,"balanceAfter":1990}
+[2025-12-01T09:47:50.104Z] Case3 TxB UPDATE sent (may block on lock)...
+[2025-12-01T09:47:50.347Z] Case3 TxA COMMIT {"txId":"tx-1764582469837-218621","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:50.345Z"}
+[2025-12-01T09:47:50.421Z] Case3 TxB UPDATE completed after A commit {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:50.419Z","amountBefore":1990,"balanceBefore":1990,"amountAfter":2010,"balanceAfter":2010}
+[2025-12-01T09:47:50.461Z] Case3 TxB COMMIT {"txId":"tx-1764582469910-739133","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:50.460Z"}
+[2025-12-01T09:47:50.576Z] Case3 final value after both commits {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2010,"balance":2010,"last_updated_at":"2025-12-01T01:47:50.000Z","last_updated_by_node":1,"version":77}
+[2025-12-01T09:47:50.614Z] === Case #1: read-read === {"isolationLevel":"REPEATABLE READ","runNo":2}
+[2025-12-01T09:47:50.810Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2010,"balance":2010,"last_updated_at":"2025-12-01T01:47:50.000Z","last_updated_by_node":1,"version":77}
+[2025-12-01T09:47:50.810Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2010,"balance":2010,"last_updated_at":"2025-12-01T01:47:50.000Z","last_updated_by_node":1,"version":77}
+[2025-12-01T09:47:50.889Z] === Case #2: write + read === {"isolationLevel":"REPEATABLE READ","runNo":2}
+[2025-12-01T09:47:51.082Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2010,"balance":2010,"last_updated_at":"2025-12-01T01:47:50.000Z","last_updated_by_node":1,"version":77}
+[2025-12-01T09:47:51.204Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:51.203Z","amountBefore":2010,"balanceBefore":2010,"amountAfter":2020,"balanceAfter":2020}
+[2025-12-01T09:47:51.243Z] Case2 TxB read before A commit {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2010,"balance":2010,"last_updated_at":"2025-12-01T01:47:50.000Z","last_updated_by_node":1,"version":77}
+[2025-12-01T09:47:51.284Z] Case2 TxA COMMIT {"txId":"tx-1764582470963-590105","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:51.283Z"}
+[2025-12-01T09:47:51.323Z] Case2 TxB second read after A commit (same TxB) {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2010,"balance":2010,"last_updated_at":"2025-12-01T01:47:50.000Z","last_updated_by_node":1,"version":77}
+[2025-12-01T09:47:51.362Z] Case2 TxB COMMIT {"txId":"tx-1764582471038-971702","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:51.361Z"}
+[2025-12-01T09:47:51.362Z] === Case #3: write-write === {"isolationLevel":"REPEATABLE READ","runNo":2}
+[2025-12-01T09:47:51.596Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2020,"balance":2020,"last_updated_at":"2025-12-01T01:47:51.000Z","last_updated_by_node":1,"version":78}
+[2025-12-01T09:47:51.596Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2020,"balance":2020,"last_updated_at":"2025-12-01T01:47:51.000Z","last_updated_by_node":1,"version":78}
+[2025-12-01T09:47:51.714Z] Case3 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:51.712Z","amountBefore":2020,"balanceBefore":2020,"amountAfter":2030,"balanceAfter":2030}
+[2025-12-01T09:47:51.715Z] Case3 TxB UPDATE sent (may block on lock)...
+[2025-12-01T09:47:51.962Z] Case3 TxA COMMIT {"txId":"tx-1764582471436-49319","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:51.961Z"}
+[2025-12-01T09:47:52.037Z] Case3 TxB UPDATE completed after A commit {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:52.036Z","amountBefore":2030,"balanceBefore":2030,"amountAfter":2050,"balanceAfter":2050}
+[2025-12-01T09:47:52.078Z] Case3 TxB COMMIT {"txId":"tx-1764582471516-312041","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:52.076Z"}
+[2025-12-01T09:47:52.194Z] Case3 final value after both commits {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2050,"balance":2050,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":80}
+[2025-12-01T09:47:52.234Z] === Case #1: read-read === {"isolationLevel":"REPEATABLE READ","runNo":3}
+[2025-12-01T09:47:52.425Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2050,"balance":2050,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":80}
+[2025-12-01T09:47:52.425Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2050,"balance":2050,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":80}
+[2025-12-01T09:47:52.503Z] === Case #2: write + read === {"isolationLevel":"REPEATABLE READ","runNo":3}
+[2025-12-01T09:47:52.691Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2050,"balance":2050,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":80}
+[2025-12-01T09:47:52.803Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:52.802Z","amountBefore":2050,"balanceBefore":2050,"amountAfter":2060,"balanceAfter":2060}
+[2025-12-01T09:47:52.843Z] Case2 TxB read before A commit {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2050,"balance":2050,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":80}
+[2025-12-01T09:47:52.882Z] Case2 TxA COMMIT {"txId":"tx-1764582472576-391689","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:52.881Z"}
+[2025-12-01T09:47:52.922Z] Case2 TxB second read after A commit (same TxB) {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2050,"balance":2050,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":80}
+[2025-12-01T09:47:52.960Z] Case2 TxB COMMIT {"txId":"tx-1764582472651-471410","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:52.959Z"}
+[2025-12-01T09:47:52.960Z] === Case #3: write-write === {"isolationLevel":"REPEATABLE READ","runNo":3}
+[2025-12-01T09:47:53.192Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2060,"balance":2060,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":81}
+[2025-12-01T09:47:53.192Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2060,"balance":2060,"last_updated_at":"2025-12-01T01:47:52.000Z","last_updated_by_node":1,"version":81}
+[2025-12-01T09:47:53.317Z] Case3 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:53.316Z","amountBefore":2060,"balanceBefore":2060,"amountAfter":2070,"balanceAfter":2070}
+[2025-12-01T09:47:53.318Z] Case3 TxB UPDATE sent (may block on lock)...
+[2025-12-01T09:47:53.559Z] Case3 TxA COMMIT {"txId":"tx-1764582473034-528064","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:53.558Z"}
+[2025-12-01T09:47:53.631Z] Case3 TxB UPDATE completed after A commit {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:53.631Z","amountBefore":2070,"balanceBefore":2070,"amountAfter":2090,"balanceAfter":2090}
+[2025-12-01T09:47:53.670Z] Case3 TxB COMMIT {"txId":"tx-1764582473110-866334","nodeId":1,"isolationLevel":"REPEATABLE READ","status":"committed","finishedAt":"2025-12-01T09:47:53.670Z"}
+[2025-12-01T09:47:53.782Z] Case3 final value after both commits {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:47:53.819Z] === Case #1: read-read === {"isolationLevel":"SERIALIZABLE","runNo":1}
+[2025-12-01T09:47:54.016Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:47:54.016Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:47:54.092Z] === Case #2: write + read === {"isolationLevel":"SERIALIZABLE","runNo":1}
+[2025-12-01T09:47:54.288Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:47:54.403Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:47:54.402Z","amountBefore":2090,"balanceBefore":2090,"amountAfter":2100,"balanceAfter":2100}
+[2025-12-01T09:48:44.453Z] Case2 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:48:44.535Z] === Case #3: write-write === {"isolationLevel":"SERIALIZABLE","runNo":1}
+[2025-12-01T09:48:44.771Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:48:44.771Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:49:34.952Z] Case3 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:49:35.066Z] === Case #1: read-read === {"isolationLevel":"SERIALIZABLE","runNo":2}
+[2025-12-01T09:49:35.338Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:49:35.338Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:49:35.448Z] === Case #2: write + read === {"isolationLevel":"SERIALIZABLE","runNo":2}
+[2025-12-01T09:49:35.721Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:49:35.882Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:49:35.881Z","amountBefore":2090,"balanceBefore":2090,"amountAfter":2100,"balanceAfter":2100}
+[2025-12-01T09:50:25.937Z] Case2 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:50:26.019Z] === Case #3: write-write === {"isolationLevel":"SERIALIZABLE","runNo":2}
+[2025-12-01T09:50:26.247Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:50:26.247Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:51:16.296Z] Case3 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:51:16.375Z] === Case #1: read-read === {"isolationLevel":"SERIALIZABLE","runNo":3}
+[2025-12-01T09:51:16.567Z] Case1 TxA read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:51:16.567Z] Case1 TxB read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:51:16.649Z] === Case #2: write + read === {"isolationLevel":"SERIALIZABLE","runNo":3}
+[2025-12-01T09:51:16.840Z] Case2 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:51:16.953Z] Case2 TxA UPDATE (uncommitted) {"type":"UPDATE","transId":1,"at":"2025-12-01T09:51:16.952Z","amountBefore":2090,"balanceBefore":2090,"amountAfter":2100,"balanceAfter":2100}
+[2025-12-01T09:52:07.384Z] Case2 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:52:07.467Z] === Case #3: write-write === {"isolationLevel":"SERIALIZABLE","runNo":3}
+[2025-12-01T09:52:07.693Z] Case3 TxA initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:52:07.693Z] Case3 TxB initial read {"trans_id":1,"account_id":1,"newdate":"1995-03-23T16:00:00.000Z","type":"Credit","amount":2090,"balance":2090,"last_updated_at":"2025-12-01T01:47:53.000Z","last_updated_by_node":1,"version":83}
+[2025-12-01T09:52:57.764Z] Case3 ERROR {"error":"Request failed with status code 400"}
+[2025-12-01T09:52:57.844Z] --- Concurrency tests completed ---
