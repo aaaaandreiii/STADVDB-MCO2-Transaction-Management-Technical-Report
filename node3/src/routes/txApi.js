@@ -31,6 +31,32 @@ router.post(
   })
 );
 
+// POST /api/tx/insert
+router.post(
+  '/insert',
+  wrap(async (req) => {
+    const {
+      nodeId,
+      accountId,
+      newdate,
+      type,
+      amount,
+      balance
+    } = req.body;
+
+    const result = await txManager.insertTrans({
+      nodeId,
+      accountId,
+      newdate,
+      type,
+      amount,
+      balance
+    });
+
+    return { result };
+  })
+);
+
 // POST /api/tx/read
 router.post(
   '/read',
