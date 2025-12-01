@@ -1,5 +1,3 @@
-{{> header}}
-
 <section class="card">
   <h2>Concurrency Experiments</h2>
   <p>
@@ -38,6 +36,7 @@
     </div>
 
     <div class="field-group">
+      <br>
       <label>Isolation level:</label>
       <select id="txA-iso">
         {{#each isolationLevels}}
@@ -47,6 +46,7 @@
     </div>
 
     <div class="field-group">
+      <br>
       <label>Notes / description:</label>
       <input id="txA-desc" type="text" placeholder="e.g., Case 2 reader" />
     </div>
@@ -58,17 +58,19 @@
       <button type="button" onclick="commitTx('A')">Commit</button>
       <button type="button" onclick="rollbackTx('A')">Rollback</button>
     </div>
-
+    <br>
     <h4>Row-level operations</h4>
     <div class="field-group">
       <label>trans_id:</label>
       <input id="txA-transId" type="number" min="1" value="1" />
     </div>
     <div class="field-group">
+      <br>
       <label>amount Δ:</label>
       <input id="txA-amountDelta" type="number" value="100" />
     </div>
     <div class="field-group">
+      <br>
       <label>balance Δ:</label>
       <input id="txA-balanceDelta" type="number" value="100" />
     </div>
@@ -78,9 +80,10 @@
       <button type="button" onclick="updateRow('A')">UPDATE</button>
       <button type="button" onclick="deleteRow('A')">DELETE</button>
     </div>
-
+    <br>
     <h4>Log</h4>
     <pre id="txA-log" class="log"></pre>
+    <br>
   </div>
 
   <div class="card">
@@ -98,6 +101,7 @@
     </div>
 
     <div class="field-group">
+      <br>
       <label>Isolation level:</label>
       <select id="txB-iso">
         {{#each isolationLevels}}
@@ -107,6 +111,7 @@
     </div>
 
     <div class="field-group">
+      <br>
       <label>Notes / description:</label>
       <input id="txB-desc" type="text" placeholder="e.g., Case 2 writer" />
     </div>
@@ -118,17 +123,19 @@
       <button type="button" onclick="commitTx('B')">Commit</button>
       <button type="button" onclick="rollbackTx('B')">Rollback</button>
     </div>
-
+    <br>
     <h4>Row-level operations</h4>
     <div class="field-group">
       <label>trans_id:</label>
       <input id="txB-transId" type="number" min="1" value="1" />
     </div>
     <div class="field-group">
+      <br>
       <label>amount Δ:</label>
       <input id="txB-amountDelta" type="number" value="100" />
     </div>
     <div class="field-group">
+      <br>
       <label>balance Δ:</label>
       <input id="txB-balanceDelta" type="number" value="100" />
     </div>
@@ -138,11 +145,16 @@
       <button type="button" onclick="updateRow('B')">UPDATE</button>
       <button type="button" onclick="deleteRow('B')">DELETE</button>
     </div>
-
+    <br>
     <h4>Log</h4>
     <pre id="txB-log" class="log"></pre>
+    <br>
   </div>
 </section>
+
+<div>
+  <br><br>
+</div>
 
 <section class="card">
   <h3>How to use:</h3>
@@ -292,5 +304,3 @@
     }
   }
 </script>
-
-{{> footer}}
