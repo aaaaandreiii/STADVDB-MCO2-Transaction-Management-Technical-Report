@@ -30,13 +30,15 @@
     <tbody id="replication-node-status-body">
       {{!-- Assumes each node has: id, role, online --}}
       {{#each nodes}}
-        <tr data-node-id="{{id}}">
-          <td>Node {{id}}</td>
-          <td>{{role}}</td>
-          <td class="node-status">
-            {{#if online}}ONLINE{{else}}OFFLINE{{/if}}
-          </td>
-        </tr>
+        {{#with (lookup ../status id) as |s|}}
+          <tr data-node-id="{{../id}}">
+            <td>Node {{../id}}</td>
+            <td>{{../role}}</td>
+            <td class="node-status">
+              {{#if s.online}}ONLINE{{else}}OFFLINE{{/if}}
+            </td>
+          </tr>
+        {{/with}}
       {{/each}}
     </tbody>
   </table>
