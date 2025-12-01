@@ -9,7 +9,7 @@ const concurrencyRoutes = require('./routes/concurrency');
 const txApiRoutes = require('./routes/txApi');
 const replicationApiRoutes = require('./routes/replication');
 const adminRoutes = require('./routes/admin');
-const replicationPageRoutes = require('./routes/replication');
+const replicationPageRoutes = require('./routes/replicationPage');
 
 const app = express();
 

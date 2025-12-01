@@ -1,32 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>STADVDB MCO2 - Node {{nodeId}} ({{nodeRole}})</title>
   <link rel="stylesheet" href="/public/css/styles.css">
+
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
+  </script>
 </head>
-<body> 
-  {{!-- <header> 
-    <h1>STADVDB MCO2 - Distributed DB Demo</h1>
-    <p>
-      You are connected to
-      <strong>Node {{nodeId}} ({{nodeRole}})</strong>
-    </p>
-    <nav>
-      <a href="/">Home |</a>
-      <a href="/transactions/local">Local Fragment |</a>
-    </nav>
-  </header> --}}
+<body>
+  {{> header}}
 
   <main>
     {{{body}}}
   </main>
 
-  {{!-- <footer>
-    <small>
-      Same app codebase deployed on all 3 nodes.
-      Node ID is determined by <code>NODE_ID</code> in the environment.
-    </small>
-  </footer> --}}
+  {{> footer}}
+
+  <script>
+    (function () {
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+
+        try {
+          localStorage.setItem('theme', theme);
+        } catch (e) {
+          // ignore if storage is blocked
+        }
+
+        var btn = document.getElementById('theme-toggle');
+        if (btn) {
+          // TEXT INDICATES CURRENT THEME
+          btn.textContent = theme === 'dark'
+            ? '🌙 Dark mode'
+            : '☀️ Light mode';
+        }
+      }
+
+      // Expose to the button's onclick
+      window.toggleTheme = function () {
+        var current = document.documentElement.getAttribute('data-theme') || 'dark';
+        var next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+      };
+
+      // Initialize on load (respect saved preference if any)
+      document.addEventListener('DOMContentLoaded', function () {
+        var initial = document.documentElement.getAttribute('data-theme') || 'dark';
+
+        try {
+          var stored = localStorage.getItem('theme');
+          if (stored === 'light' || stored === 'dark') {
+            initial = stored;
+          }
+        } catch (e) {}
+
+        applyTheme(initial);
+      });
+    })();
+  </script>
 </body>
 </html>
