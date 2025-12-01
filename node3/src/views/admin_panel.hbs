@@ -20,7 +20,8 @@
       <tr>
         <th>Node</th>
         <th>Role</th>
-        <th>Status</th>
+        <th>Status flag</th>
+        <th>DB health (live)</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -32,6 +33,10 @@
             <td>{{../role}}</td>
             <td class="node-status">
               {{#if online}}ONLINE{{else}}OFFLINE{{/if}}
+            </td>
+            <td class="node-health">
+              <!-- will be filled by /admin/health -->
+              (click "Run DB Health Check")
             </td>
             <td>
               <button type="button" onclick="setNodeOnline({{../id}}, true)">
@@ -53,7 +58,10 @@
   </p>
 
   <button type="button" onclick="refreshStatuses()">
-    Refresh Statuses
+    Refresh Status Flags
+  </button>
+  <button type="button" onclick="refreshHealth()">
+    Run DB Health Check
   </button>
 </section>
 
@@ -83,6 +91,30 @@
     }
   }
 
+  async function refreshHealth() {
+    try {
+      const data = await fetchJson('/admin/health');
+      const health = data.health || {};
+      const tbody = document.getElementById('nodes-table-body');
+
+      Array.from(tbody.querySelectorAll('tr')).forEach((row) => {
+        const nodeId = parseInt(row.getAttribute('data-node-id'), 10);
+        const h = health[nodeId];
+        const cell = row.querySelector('.node-health');
+
+        if (!h) {
+          cell.textContent = 'Unknown';
+        } else if (h.reachable) {
+          cell.textContent = '✅ DB OK';
+        } else {
+          cell.textContent = '❌ DB ERROR: ' + (h.error || 'unreachable');
+        }
+      });
+    } catch (err) {
+      alert('Failed to run DB health check: ' + err.message);
+    }
+  }
+
   async function setNodeOnline(nodeId, online) {
     try {
       await fetchJson('/admin/node-status/' + nodeId, {
@@ -93,6 +125,7 @@
         body: JSON.stringify({ online })
       });
       await refreshStatuses();
+      await refreshHealth();
     } catch (err) {
       alert('Failed to update node status: ' + err.message);
     }
@@ -100,5 +133,6 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     refreshStatuses().catch((err) => console.error(err));
+    refreshHealth().catch((err) => console.error(err));
   });
 </script>
