@@ -16,6 +16,30 @@ const { isNodeOnline } = require('../state/nodeStatus');
 //    Node 3 (fragment): rows where type != 'Credit' 
 //                            AKA ('Debit (Withdrawal)', 'VYBER')
 
+// Auto-replication config
+const AUTO_REPLICATION_ENABLED =
+  (process.env.AUTO_REPLICATION_ENABLED || 'true').toLowerCase() === 'true';
+
+const AUTO_REPLICATION_INTERVAL_MS = parseInt(
+  process.env.AUTO_REPLICATION_INTERVAL_MS || '1000',
+  10
+);
+
+const AUTO_REPLICATION_LIMIT = parseInt(
+  process.env.AUTO_REPLICATION_LIMIT || '100',
+  10
+);
+
+const REPLICATION_PAIRS = [
+  { sourceNodeId: 1, targetNodeId: 2 },   //central node --> credit fragment
+  { sourceNodeId: 1, targetNodeId: 3 },   //central --> !credit fragment
+  { sourceNodeId: 2, targetNodeId: 1 },   //credit --> back to central
+  { sourceNodeId: 3, targetNodeId: 1 },   //debit/vyber --> central
+];
+
+let autoReplicationTimer = null;
+let autoReplicationRunning = false;
+
 function determineTargets(sourceNodeId, txType) {
   const type = (txType || '').trim();
 
@@ -51,7 +75,6 @@ async function queueReplicationForRow(conn, params) {
   } = params;
 
   const targets = determineTargets(sourceNodeId, type);
-
   if (targets.length === 0) {
     return { queued: 0, targets: [] };
   }
@@ -219,8 +242,67 @@ async function runReplicationOnce(params) {
   };
 }
 
+async function runAutoReplicationBatch() {
+  if (autoReplicationRunning) {
+    // avoid overlapping runs
+    return;
+  }
+
+  autoReplicationRunning = true;
+
+  try {
+    for (const { sourceNodeId, targetNodeId } of REPLICATION_PAIRS) {
+      try {
+        const outcome = await runReplicationOnce({
+          sourceNodeId,
+          targetNodeId,
+          limit: AUTO_REPLICATION_LIMIT
+        });
+
+        if (outcome && outcome.results && outcome.results.length > 0) {
+          console.log(
+            `[replication] auto batch ${sourceNodeId} -> ${targetNodeId}:`,
+            outcome.results.length,
+            'events applied'
+          );
+        }
+      } catch (err) {
+        console.error(
+          `[replication] error in auto batch ${sourceNodeId} -> ${targetNodeId}:`,
+          err.message
+        );
+      }
+    }
+  } finally {
+    autoReplicationRunning = false;
+  }
+}
+
+function startAutoReplication() {
+  if (!AUTO_REPLICATION_ENABLED) {
+    console.log('[replication] Auto replication DISABLED via env flag');
+    return;
+  }
+
+  if (autoReplicationTimer) {
+    //if already started, dont do anything
+    return;
+  }
+
+  console.log(
+    `[replication] Starting auto replication worker every ${AUTO_REPLICATION_INTERVAL_MS}ms`
+  );
+
+  autoReplicationTimer = setInterval(
+    runAutoReplicationBatch,
+    AUTO_REPLICATION_INTERVAL_MS
+  );
+}
+
 module.exports = {
   determineTargets,
   queueReplicationForRow,
-  runReplicationOnce
+  runReplicationOnce,
+  runAutoReplicationBatch,
+  startAutoReplication
 };

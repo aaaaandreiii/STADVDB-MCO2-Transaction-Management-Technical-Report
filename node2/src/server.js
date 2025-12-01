@@ -1,5 +1,6 @@
 const app = require('./app');
 const { initPools, currentNodeId, currentNode } = require('./db');
+const { startAutoReplication } = require('./services/replication');
 
 const PORT = process.env.PORT || 3001;
 
@@ -8,6 +9,7 @@ const PORT = process.env.PORT || 3001;
     await initPools();
 
     app.listen(PORT, () => {
+      startAutoReplication();
       console.log(
         `[HTTP] Node ${currentNodeId} (${currentNode.role}) listening on port: http://localhost:${PORT}`
       );

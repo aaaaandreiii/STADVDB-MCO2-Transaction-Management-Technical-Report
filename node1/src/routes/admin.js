@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { nodes } = require('../config/nodes');
 const { getAllStatuses, setNodeOnline } = require('../state/nodeStatus');
+const { getPool } = require('../db');
+const { runAutoReplicationBatch } = require('../services/replication');
 
 function wrap(handler) {
   return async (req, res, next) => {
@@ -37,10 +39,32 @@ router.get(
   })
 );
 
+// GET /admin/health
+//actually try to connect to each DB node
+router.get(
+  '/health',
+  wrap(async () => {
+    const results = {};
+
+    for (const [id, node] of Object.entries(nodes)) {
+      const nodeId = parseInt(id, 10);
+      try {
+        const pool = getPool(nodeId);
+        await pool.query('SELECT 1');
+        results[nodeId] = { reachable: true };
+      } catch (err) {
+        results[nodeId] = { reachable: false, error: err.message };
+      }
+    }
+
+    return { health: results };
+  })
+);
+
 // POST /admin/node-status/:nodeId
 router.post(
   '/node-status/:nodeId',
-  wrap((req) => {
+  wrap(async (req) => {
     const nodeId = parseInt(req.params.nodeId, 10);
     const node = nodes[nodeId];
     if (!node) {
@@ -49,10 +73,27 @@ router.post(
     const online = !!req.body.online;
     setNodeOnline(nodeId, online);
 
-    // body: { online: true/false }
     const status = getAllStatuses()[nodeId];
+
+    //if node just turned ONLINE
+    //    replication should catch-up
+    if (online) {
+      try {
+        await runAutoReplicationBatch();
+        console.log(
+          `[admin] Node ${nodeId} marked ONLINE; ran replication catch-up batch.`
+        );
+      } catch (err) {
+        console.error(
+          `[admin] Failed to run replication catch-up after node ${nodeId} ONLINE:`,
+          err.message
+        );
+      }
+    }
+
     return { nodeId, online: status.online };
   })
 );
+
 
 module.exports = router;
