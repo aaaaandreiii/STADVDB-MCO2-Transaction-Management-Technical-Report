@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getPool, currentNodeId } = require('../db');
+const { nodes } = require('../config/nodes');
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 200;
@@ -147,6 +148,13 @@ router.get('/local', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// CRUD using /api/tx endpoints
+router.get('/crud', (req, res) => {
+  res.render('transactions_crud', {
+    nodes: Object.values(nodes)
+  });
 });
 
 module.exports = router;

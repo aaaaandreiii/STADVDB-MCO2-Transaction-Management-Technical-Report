@@ -1,5 +1,5 @@
 const { getPool, currentNodeId } = require('../db');
-const { queueReplicationForRow } = require('./replication');
+const { queueReplicationForRow, runAutoReplicationBatch } = require('./replication');
 const { isNodeOnline } = require('../state/nodeStatus');
 
 const ISOLATION_LEVELS = [
@@ -122,6 +122,83 @@ async function readTrans({ txId, transId }) {
   });
 
   return { row, nodeId: tx.nodeId, isolationLevel: tx.isolationLevel };
+}
+
+//INSERT a new row inside its own short transaction
+async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }) {
+  const node = parseInt(nodeId || currentNodeId, 10);
+  if (![1, 2, 3].includes(node)) {
+    throw new Error('nodeId must be 1, 2, or 3');
+  }
+
+  if (!isNodeOnline(node)) {
+    throw new Error(
+      `Node ${node} is offline in this simulation; cannot insert on it`
+    );
+  }
+
+  const pool = getPool(node);
+  const conn = await pool.getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    //insert the row
+    //ASSUME trans_id is AUTO_INCREMENT
+    const [result] = await conn.query(
+      `
+      INSERT INTO trans
+        (account_id, newdate, type, amount, balance, last_updated_by_node, version)
+      VALUES (?, ?, ?, ?, ?, ?, 1)
+      `,
+      [accountId, newdate, type, amount, balance, node]
+    );
+
+    const transId = result.insertId;
+
+    // Queue replication for this new row
+    await queueReplicationForRow(conn, {
+      sourceNodeId: node,
+      transId,
+      type,
+      opType: 'INSERT',
+      amountBefore: null,
+      balanceBefore: null,
+      amountAfter: amount,
+      balanceAfter: balance
+    });
+
+    await conn.commit();
+
+    // Immediately trigger replication
+    try {
+      await runAutoReplicationBatch();
+    } catch (err) {
+      console.error(
+        `[TX] Failed to run replication after INSERT trans_id=${transId}:`,
+        err.message
+      );
+    }
+
+    return {
+      nodeId: node,
+      transId,
+      accountId,
+      newdate,
+      type,
+      amount,
+      balance
+    };
+  } catch (err) {
+    try {
+      await conn.rollback();
+    } catch (rollbackErr) {
+      console.error('[TX] Failed to rollback INSERT transaction:', rollbackErr);
+    }
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 //1. UPDATE a row inside a transaction
@@ -254,6 +331,19 @@ async function commitTransaction({ txId }) {
     `[TX] Committed transaction ${tx.txId} on node ${tx.nodeId}`
   );
 
+  //immediately try to replicate after successful commit
+  try {
+    await runAutoReplicationBatch();
+    console.log(
+      `[TX] Triggered replication batch after commit of ${tx.txId}`
+    );
+  } catch (err) {
+    console.error(
+      `[TX] Failed to run replication after commit of ${tx.txId}:`,
+      err.message
+    );
+  }
+
   return {
     txId: tx.txId,
     nodeId: tx.nodeId,
@@ -303,6 +393,7 @@ function listTransactions() {
 module.exports = {
   ISOLATION_LEVELS,
   startTransaction,
+  insertTrans,
   readTrans,
   updateTrans,
   deleteTrans,
