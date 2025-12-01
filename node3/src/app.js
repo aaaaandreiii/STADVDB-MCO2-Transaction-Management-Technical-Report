@@ -10,6 +10,7 @@ const txApiRoutes = require('./routes/txApi');
 const replicationApiRoutes = require('./routes/replication');
 const adminRoutes = require('./routes/admin');
 const replicationPageRoutes = require('./routes/replicationPage');
+const reportsRoutes = require('./routes/reports');
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/transactions', transactionsRoutes);
 app.use('/concurrency', concurrencyRoutes);
 app.use('/replication', replicationPageRoutes);
 app.use('/admin', adminRoutes);
+app.use('/reports', reportsRoutes);
 
 app.use('/api/tx', txApiRoutes);
 app.use('/api/replication', replicationApiRoutes);

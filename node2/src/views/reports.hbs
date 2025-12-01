@@ -1,0 +1,48 @@
+<section class="card">
+  <h2>Reports (Node {{nodeId}} - {{nodeRole}})</h2>
+  <p>Simple text-based summaries of the local <code>trans</code> table.</p>
+</section>
+
+<section class="card">
+  <h3>Totals by Transaction Type</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Count</th>
+        <th>Total Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each byType}}
+        <tr>
+          <td>{{type}}</td>
+          <td>{{cnt}}</td>
+          <td>{{total_amount}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h3>Daily Totals (last 30 days)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Count</th>
+        <th>Total Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each byDay}}
+        <tr>
+          <td>{{day}}</td>
+          <td>{{cnt}}</td>
+          <td>{{total_amount}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</section>
