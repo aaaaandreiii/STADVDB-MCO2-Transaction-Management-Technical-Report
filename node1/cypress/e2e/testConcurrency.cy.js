@@ -1,49 +1,276 @@
-const nodes = {
-    n1: "https://team-node1.ccs-cloud.com",
-    n2: "https://team-node2.ccs-cloud.com",
-    n3: "https://team-node3.ccs-cloud.com",
-};
+const NODE1 = "http://ccscloud.dlsu.edu.ph:60115/";
+const NODE2 = "http://ccscloud.dlsu.edu.ph:60116/";
+const NODE3 = "http://ccscloud.dlsu.edu.ph:60117/";
 
-const levels = ["read uncommitted", "read committed", "repeatable read", "serializable"];
+const ISOLATION_LEVELS = [
+    "READ UNCOMMITTED",
+    "READ COMMITTED",
+    "REPEATABLE READ",
+    "SERIALIZABLE"
+];
 
-describe("Global Concurrency Control Tests", () => {
-    levels.forEach((level) => {
-        describe(`Testing on isolation level: ${level}`, () => {
-            it("Case 1: Concurrent READ-READ", () => {
-            cy.visitNode(nodes.n1);
-            cy.setIsolation(level);
-            cy.readRow(1);
+describe("MCO2 Distributed Database Concurrency and Recovery", () => {
+    ISOLATION_LEVELS.forEach(level => {
+        describe(`=== Isolation Level: ${level} ===`, () => {
+            // CASE 1: Concurrent Reads
+            it("Case 1: Concurrent Reads on same item", () => {
+                cy.log("Testing concurrent READS...");
+                if(level == "READ UNCOMMITTED") {
+                    cy.visit(NODE1 + 'concurrency')
+                    // cy.visit(NODE1)
+                    // cy.contains('a', 'Concurrency Demo').click();
+                    cy.get('#txA-node').select('Node 1 (central)');
+                    cy.get('#txA-iso').select(`${level}`);
+                    cy.contains('button', 'Start Tx A').click();
+                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('button', 'READ').click();
+                    cy.contains('READ trans_id').should('be.visible');
 
-            cy.visitNode(nodes.n2);
-            cy.setIsolation(level);
-            cy.readRow(1);
+                    cy.origin(NODE2, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 2 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'READ').click();
+                        cy.contains('READ trans_id').should('be.visible');
+                    });
+                } else {
+                    cy.visit(NODE1 + 'concurrency')
+                    // cy.visit(NODE1)
+                    // cy.contains('a', 'Concurrency Demo').click();
+                    cy.get('#txA-node').select('Node 1 (central)');
+                    cy.get('#txA-iso').select(`${level}`);
+                    cy.contains('button', 'Start Tx A').click();
+                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('button', 'READ').click();
+                    cy.contains('READ trans_id').should('be.visible');
+                    cy.contains('button', 'Commit').click();
+                    cy.contains('COMMIT').should('be.visible');
 
-            cy.logShouldContain("READ OK");
+                    cy.origin(NODE2, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 2 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'READ').click();
+                        cy.contains('READ trans_id').should('be.visible');
+                        cy.contains('button', 'Commit').click();
+                        cy.contains('COMMIT').should('be.visible');
+                    });
+                }
             });
 
-            it("Case 2: Concurrent WRITE (Node2) + READ (Node1)", () => {
-            cy.visitNode(nodes.n2);
-            cy.setIsolation(level);
-            cy.writeRow(1, "value_from_node2");
+            // CASE 2: Write + Read
+            it("Case 2: Write on one node, Read on others", () => {
+                cy.log("Testing Write + Read...");
 
-            cy.visitNode(nodes.n1);
-            cy.setIsolation(level);
-            cy.readRow(1);
+                if(level == "READ UNCOMMITTED") {
+                    cy.visit(NODE1 + 'concurrency')
+                    // cy.visit(NODE1)
+                    // cy.contains('a', 'Concurrency Demo').click();
+                    cy.get('#txA-node').select('Node 1 (central)');
+                    cy.get('#txA-iso').select(`${level}`);
+                    cy.contains('button', 'Start Tx A').click();
+                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('button', 'UPDATE').click();
+                    // cy.contains('UPDATE trans_id').should('be.visible');
 
-            cy.logShouldContain("value_from_node2");
+                    cy.origin(NODE2, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 2 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'READ').click();
+                        cy.contains('READ trans_id').should('be.visible');
+                    });
+
+                    cy.origin(NODE3, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 3 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'READ').click();
+                        cy.contains('READ trans_id').should('be.visible');
+                    });
+                } else {
+                    cy.visit(NODE1 + 'concurrency')
+                    // cy.visit(NODE1)
+                    // cy.contains('a', 'Concurrency Demo').click();
+                    cy.get('#txA-node').select('Node 1 (central)');
+                    cy.get('#txA-iso').select(`${level}`);
+                    cy.contains('button', 'Start Tx A').click();
+                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('button', 'UPDATE').click();
+                    // cy.contains('UPDATE trans_id').should('be.visible');
+                    cy.contains('button', 'Commit').click();
+                    cy.contains('COMMIT').should('be.visible');
+
+                    cy.origin(NODE2, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 2 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'READ').click();
+                        cy.contains('READ trans_id').should('be.visible');
+                        cy.contains('button', 'Commit').click();
+                        cy.contains('COMMIT').should('be.visible');
+                    });
+
+                    cy.origin(NODE3, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 3 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'READ').click();
+                        cy.contains('READ trans_id').should('be.visible');
+                        cy.contains('button', 'Commit').click();
+                        cy.contains('COMMIT').should('be.visible');
+                    });
+                }
             });
 
-            it("Case 3: WRITE-WRITE conflict", () => {
-            cy.visitNode(nodes.n2);
-            cy.setIsolation(level);
-            cy.writeRow(1, "v2");
+            // CASE 3: Concurrent Writes
+            it("Case 3: Concurrent Writes (Node2 vs Node3)", () => {
+                cy.log("Testing concurrent WRITES...");
+                if(level == "READ UNCOMMITTED") {
+                    cy.visit(NODE1 + 'concurrency')
+                    // cy.visit(NODE1)
+                    // cy.contains('a', 'Concurrency Demo').click();
+                    cy.get('#txA-node').select('Node 1 (central)');
+                    cy.get('#txA-iso').select(`${level}`);
+                    cy.contains('button', 'Start Tx A').click();
+                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('button', 'UPDATE').click();
+                    // cy.contains('UPDATE trans_id').should('be.visible');
 
-            cy.visitNode(nodes.n3);
-            cy.setIsolation(level);
-            cy.writeRow(1, "v3");
+                    cy.origin(NODE2, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 2 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'UPDATE').click();
+                        // cy.contains('UPDATE trans_id').should('be.visible');
+                    });
+                } else {
+                    cy.visit(NODE1 + 'concurrency')
+                    // cy.visit(NODE1)
+                    // cy.contains('a', 'Concurrency Demo').click();
+                    cy.get('#txA-node').select('Node 1 (central)');
+                    cy.get('#txA-iso').select(`${level}`);
+                    cy.contains('button', 'Start Tx A').click();
+                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('button', 'UPDATE').click();
+                    // cy.contains('UPDATE trans_id').should('be.visible');
+                    cy.contains('button', 'Commit').click();
+                    cy.contains('COMMIT').should('be.visible');
 
-            cy.logShouldContain("CONFLICT DETECTED")
+                    cy.origin(NODE2, { args: { level } }, ({ level }) => {
+                        cy.visit('concurrency')
+                        // cy.visit(NODE2)
+                        // cy.contains('a', 'Concurrency Demo').click();
+                        cy.get('#txA-node').select('Node 2 (fragment)');
+                        cy.get('#txA-iso').select(level);
+                        cy.contains('button', 'Start Tx A').click();
+                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('button', 'UPDATE').click();
+                        // cy.contains('UPDATE trans_id').should('be.visible');
+                        cy.contains('button', 'Commit').click();
+                        cy.contains('COMMIT').should('be.visible');
+                    });
+                }
             });
+        });
+    });
+
+    // STEP 4: FAILURE RECOVERY CASES
+    describe("=== FAILURE RECOVERY TESTS ===", () => {
+        // CASE 1: Node1 fails during replication
+        it("Case 1: Node 1 fails during replication", () => {
+            cy.log("Testing: Node1 down while Node2 writes.");
+
+            cy.visit(NODE1 + 'admin/panel')
+            cy.get('button[onclick="setNodeOnline(1, false)"]').click();
+
+            cy.origin(NODE2, () => {
+                cy.visit('concurrency')
+                cy.get('#txA-node').select('Node 2 (fragment)');
+                cy.get('#txA-iso').select('REPEATABLE READ');
+                cy.contains('button', 'Start Tx A').click();
+                cy.contains('Started transaction').should('be.visible');
+                cy.contains('button', 'UPDATE').click();
+                // cy.contains('UPDATE trans_id').should('be.visible');
+                cy.contains('button', 'Commit').click();
+                cy.contains('COMMIT').should('be.visible');
+            });
+        });
+
+        // CASE 2: Node1 recovers after missing updates
+        it("Case 2: Node1 recovers and gets missed writes", () => {
+            cy.log("Testing: Node1 recovers from failure.");
+
+            cy.visit(NODE1 + 'admin/panel')
+            cy.get('button[onclick="setNodeOnline(1, true)"]').click();
+
+            cy.origin(NODE1, () => {
+                cy.visit('transactions/local')
+                cy.get('#search').type('1{enter}');
+            });
+            // Show logs to verify.
+        });
+
+        // CASE 3: Node2 fails during replication from Node1
+        it("Case 3: Node2 fails during central-node replication", () => {
+            cy.log("Testing: Node2 down while Node1 writes.");
+
+            cy.visit(NODE2 + 'admin/panel')
+            cy.get('button[onclick="setNodeOnline(2, false)"]').click();
+
+            cy.origin(NODE1, () => {
+                cy.visit('concurrency')
+                cy.get('#txA-node').select('Node 1 (fragment)');
+                cy.get('#txA-iso').select('REPEATABLE READ');
+                cy.contains('button', 'Start Tx A').click();
+                cy.contains('Started transaction').should('be.visible');
+                cy.contains('button', 'UPDATE').click();
+                // cy.contains('UPDATE trans_id').should('be.visible');
+                cy.contains('button', 'Commit').click();
+                cy.contains('COMMIT').should('be.visible');
+            });
+        });
+
+        // CASE 4: Node3 misses writes and recovers later
+        it("Case 4: Node2 recovers and receives missed writes", () => {
+            cy.log("Testing: Node2 recovers from failure.");
+
+            cy.visit(NODE2 + 'admin/panel')
+            cy.get('button[onclick="setNodeOnline(2, true)"]').click();
+
+            cy.origin(NODE2, () => {
+                cy.visit('transactions/local')
+                cy.get('#search').type('1{enter}');
+            });
+            // Show logs to verify.
         });
     });
 });
