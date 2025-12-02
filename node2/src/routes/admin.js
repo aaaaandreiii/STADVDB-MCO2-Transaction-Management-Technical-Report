@@ -22,19 +22,23 @@ function wrap(handler) {
 // GET /admin/panel
 // admin UI to toggle node online/offline;
 // and see statuses
-router.get('/panel', (req, res) => {
-  const status = getAllStatuses();
-  res.render('admin_panel', {
-    nodes: Object.values(nodes),
-    status
-  });
+router.get('/panel', async (req, res, next) => {
+  try {
+    const status = await getAllStatuses();
+    res.render('admin_panel', {
+      nodes: Object.values(nodes),
+      status
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // GET /admin/node-status
 router.get(
   '/node-status',
-  wrap(() => {
-    const status = getAllStatuses();
+  wrap(async () => {
+    const status = await getAllStatuses();
     return { nodes, status };
   })
 );
@@ -71,9 +75,11 @@ router.post(
       throw new Error(`Unknown nodeId ${nodeId}`);
     }
     const online = !!req.body.online;
-    setNodeOnline(nodeId, online);
 
-    const status = getAllStatuses()[nodeId];
+    await setNodeOnline(nodeId, online);
+
+    const statusMap = await getAllStatuses();
+    const status = statusMap[nodeId];
 
     //if node just turned ONLINE
     //    replication should catch-up

@@ -105,7 +105,7 @@ async function queueReplicationForRow(conn, params) {
 
 //apply a single replication_log entry from source --> target
 async function applySingleEvent(logRow, sourceNodeId, targetNodeId) {
-  if (!isNodeOnline(targetNodeId)) {
+  if (!(await isNodeOnline(targetNodeId))) {
     return {
       id: logRow.id,
       status: 'skipped',

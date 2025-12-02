@@ -22,11 +22,16 @@ const DEFAULT_SORT_BY = 'id';
 const DEFAULT_SORT_DIR = 'desc';
 
 // manual (not automated) replication experimentation on /replication
-router.get('/', (req, res) => {
-  res.render('replication', {
-    nodes: Object.values(nodes),
-    status: getAllStatuses()
-  });
+router.get('/', async (req, res, next) => {
+  try {
+    const status = await getAllStatuses();
+    res.render('replication', {
+      nodes: Object.values(nodes),
+      status
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // /replication/logs – view replication_log entries on this node
