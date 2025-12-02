@@ -204,7 +204,7 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
 //1. UPDATE a row inside a transaction
 //2. queue replication log entries for the change
 async function updateTrans(params) {
-  const { txId, transId, amountDelta, balanceDelta } = params;
+  const { txId, transId, amountDelta, balanceDelta, isolationLevel } = params;
   const tx = requireTx(txId);
   const id = parseInt(transId, 10);
   const deltaAmount = Number(amountDelta || 0);
@@ -212,11 +212,15 @@ async function updateTrans(params) {
 
   //read current state 
   //    then lock row for this transaction
-  const [rows] = await tx.connection.query(
-    `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
-    [id]
-  );
-
+  if(isolationLevel = "SERIALIZABLE") {
+    
+  } else {
+    const [rows] = await tx.connection.query(
+      `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+      [id]
+    );
+  }
+  
   if (!rows || rows.length === 0) {
     throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
   }
