@@ -71,14 +71,12 @@ router.post(
 router.post(
   '/update',
   wrap(async (req) => {
-    const isolationLevel = req.body
     const { txId, transId, amountDelta, balanceDelta } = req.body;
     const result = await txManager.updateTrans({
       txId,
       transId,
       amountDelta,
-      balanceDelta,
-      isolationLevel
+      balanceDelta
     });
     return { result };
   })
