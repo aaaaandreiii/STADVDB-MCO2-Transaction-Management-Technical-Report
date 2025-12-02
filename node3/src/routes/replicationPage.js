@@ -19,7 +19,7 @@ const VALID_SORT_COLUMNS = [
 ];
 
 const DEFAULT_SORT_BY = 'id';
-const DEFAULT_SORT_DIR = 'asc';
+const DEFAULT_SORT_DIR = 'desc';
 
 // manual (not automated) replication experimentation on /replication
 router.get('/', (req, res) => {
