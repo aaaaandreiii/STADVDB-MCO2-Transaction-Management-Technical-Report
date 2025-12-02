@@ -202,8 +202,7 @@
     if (payload !== undefined) {
       line += '\n  ' + JSON.stringify(payload, null, 2);
     }
-    logEl.textContent += line + '\n' + logEl.textContent;
-//    logEl.textContent = line + '\n' + logEl.textContent; //log updates appear at top instead of bottom
+    logEl.textContent += line + '\n';
     logEl.scrollTop = logEl.scrollHeight;
   }
 
