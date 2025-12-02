@@ -4,6 +4,7 @@
 */
 
 /* ===== Reset / base ===== */
+
 *,
 *::before,
 *::after {
@@ -78,8 +79,10 @@ html[data-theme='light'] {
 
 body {
   min-height: 100vh;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
   background:
     radial-gradient(circle at top, #020617 0, rgba(15, 23, 42, 0.1) 40%, transparent 70%),
     radial-gradient(circle at bottom, #020617 0, rgba(30, 64, 175, 0.25) 35%, transparent 70%),
@@ -93,11 +96,13 @@ body {
 
 main {
   max-width: 1120px;
+  flex: 1 0 auto;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
 }
 
 /* headings */
+
 h1,
 h2,
 h3,
@@ -125,6 +130,7 @@ h4 {
 }
 
 /* text helpers */
+
 p {
   margin: 0.35rem 0;
   line-height: 1.5;
@@ -141,6 +147,7 @@ small {
 }
 
 /* links */
+
 a {
   color: var(--color-accent);
   text-decoration: none;
@@ -191,6 +198,7 @@ header p {
 }
 
 .nav-links a {
+  display: inline-flex;
   font-size: 0.95rem;
   opacity: 0.85;
 }
@@ -301,6 +309,7 @@ button:active,
 }
 
 /* group of buttons */
+
 .buttons {
   display: flex;
   flex-wrap: wrap;
@@ -311,6 +320,8 @@ button:active,
 /* ===== Forms / inputs ===== */
 
 .field-group {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 0.35rem;
 }
 
@@ -346,6 +357,7 @@ select:focus {
 }
 
 /* Search bar block */
+
 .search-bar {
   margin-top: 1rem;
   margin-bottom: 1.25rem;
@@ -399,6 +411,11 @@ select:focus {
 
 /* ===== Tables ===== */
 
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -417,6 +434,7 @@ td {
   padding: 0.5rem 0.7rem;
   text-align: left;
   border-bottom: 1px solid var(--color-border-subtle);
+  white-space: nowrap;
 }
 
 th {
@@ -436,6 +454,22 @@ tbody tr:hover {
   background-color: var(--color-table-row-hover);
 }
 
+/* Replication logs table styling */
+
+.replication-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.replication-log-table th,
+.replication-log-table td {
+  padding: 0.4rem 0.7rem;
+  text-align: left;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 /* ===== Logs / code blocks ===== */
 
 pre,
@@ -453,6 +487,8 @@ code {
   overflow: auto;
   font-size: 0.82rem;
   line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 html[data-theme='light'] .log {
@@ -471,15 +507,50 @@ footer {
     rgba(15, 23, 42, 0.96);
 }
 
-/* ===== Responsiveness ===== */
+/* ===== Responsive ===== */
+
+/* Small screens */
 
 @media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
   header {
     padding: 1rem 1.1rem 1rem;
   }
 
   main {
     padding: 1.5rem 1.1rem 2.5rem;
+  }
+
+  header h1 {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+
+  header p {
+    font-size: 0.85rem;
+  }
+
+  .top-nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .nav-links a {
+    margin-right: 0;
+  }
+
+  .theme-toggle {
+    align-self: stretch;
+    text-align: center;
   }
 
   .search-bar form {
@@ -490,34 +561,223 @@ footer {
   .pagination-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .page-info {
+    font-size: 0.85rem;
   }
 
   .page-nav {
+    display: flex;
     justify-content: flex-start;
     flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .page-button {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .card {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0.75rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-container,
+  .replication-log-table,
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table thead,
+  table tbody,
+  table tr,
+  table th,
+  table td {
+    white-space: nowrap;
+  }
+
+  th,
+  td {
+    padding: 0.3rem 0.4rem;
+  }
+
+  .log {
+    max-height: 200px;
+    font-size: 0.8rem;
+  }
+
+  .buttons {
+    flex-direction: column;
+  }
+
+  .buttons button,
+  .buttons .button-link,
+  .buttons .page-button {
+    width: 100%;
   }
 }
 
-body {
-  min-height: 100vh;
-  display: flex;           /* NEW */
-  flex-direction: column;  /* NEW */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
-  background:
-    radial-gradient(circle at top, #020617 0, rgba(15, 23, 42, 0.1) 40%, transparent 70%),
-    radial-gradient(circle at bottom, #020617 0, rgba(30, 64, 175, 0.25) 35%, transparent 70%),
-    var(--color-bg);
-  color: var(--color-text);
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease,
-    background 0.25s ease;
+/* Larger forms: align label + input horizontally */
+
+@media (min-width: 768px) {
+  .field-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .field-group > label {
+    min-width: 150px;
+    margin-bottom: 0;
+  }
+
+  .field-group > input,
+  .field-group > select {
+    flex: 1;
+  }
 }
 
-main {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
-  flex: 1 0 auto;          /* NEW: main takes the remaining height */
+/* === Mobile app-style tweaks (phones) === */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 0.75rem 0.9rem;
+  }
+
+  main {
+    padding: 0.75rem 0.9rem 1.5rem;
+  }
+
+  header h1 {
+    font-size: 1.05rem;
+    margin-bottom: 0.2rem;
+  }
+
+  header p {
+    font-size: 0.8rem;
+  }
+
+  /* Stack nav vertically */
+  .top-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .nav-links a {
+    font-size: 0.85rem;
+  }
+
+  .theme-toggle {
+    align-self: stretch;
+    text-align: center;
+    padding: 0.45rem 0.75rem;
+  }
+
+  /* Cards full-width, slightly tighter */
+  .card {
+    margin: 0 0 0.75rem;
+    padding: 0.75rem 0.75rem;
+    border-radius: 0.75rem;
+  }
+
+  /* 1-column grids on phone (concurrency, CRUD) */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Forms: labels above inputs */
+  .field-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .field-group > label {
+    min-width: auto;
+    margin-bottom: 0.2rem;
+  }
+
+  .field-group > input,
+  .field-group > select {
+    width: 100%;
+  }
+
+  /* Make button rows vertical & full-width on phone */
+  .buttons {
+    flex-direction: column;
+  }
+
+  .buttons button,
+  .page-button,
+  .button-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Tables: scroll horizontally instead of shrinking text */
+  .table-container,
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  thead, tbody, tr, th, td {
+    white-space: nowrap;
+  }
+
+  th, td {
+    padding: 0.3rem 0.4rem;
+  }
+
+  /* Pagination block stacks nicely */
+  .pagination-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .page-info span {
+    font-size: 0.8rem;
+  }
+
+  .page-nav {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .page-button {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Logs a bit smaller and taller for better reading */
+  .log {
+    max-height: 220px;
+    font-size: 0.8rem;
+  }
 }

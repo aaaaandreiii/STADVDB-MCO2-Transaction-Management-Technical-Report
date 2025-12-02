@@ -521,3 +521,30 @@ main {
   padding: 2rem 1.5rem 3rem;
   flex: 1 0 auto;          /* NEW: main takes the remaining height */
 }
+
+/* Generic scrollable table container */
+.table-container {
+  width: 100%;
+  overflow-x: auto;        /* horizontal scroll if needed */
+}
+
+/* Replication logs table styling */
+.replication-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* optional: keep columns from exploding */
+  table-layout: auto;
+}
+
+.replication-log-table th,
+.replication-log-table td {
+  padding: 0.4rem 0.7rem;
+  text-align: left;
+  font-size: 0.9rem;
+  white-space: nowrap;      /* keeps dates/numbers tidy; scrolling handles overflow */
+}
+
+/* Optional: make all tables a bit nicer */
+.card table {
+  margin-top: 0.75rem;
+}

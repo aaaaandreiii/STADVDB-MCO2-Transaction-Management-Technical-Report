@@ -25,7 +25,7 @@ function generateTxId() {
   return `tx-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 }
 
-function requireTx(txId) {
+async function requireTx(txId) {
   const tx = txStore.get(txId);
   if (!tx) {
     throw new Error(`Transaction ${txId} not found or already finished`);
@@ -35,12 +35,54 @@ function requireTx(txId) {
   }
   //integrate node failure into normal operations:
   //    if a node is marked offline, existing transactions on that node cannot proceed.
-  if (!isNodeOnline(tx.nodeId)) {
+  if (!(await isNodeOnline(tx.nodeId))) {
     throw new Error(
       `Node ${tx.nodeId} is offline in this simulation; transaction ${txId} cannot proceed`
     );
   }
   return tx;
+}
+
+//to implement to fix "lock wait timeout exceeded"
+  // try {
+  //    UPDATE (row lock)
+  // } catch (error) {
+  //    try {
+  //       ROLLBACK
+  //       release pool
+  //    } catch {
+  //       
+  //    }
+  // }
+
+//to keep updateTrans/deleteTrans clean
+async function failAndCleanupTx(tx, context, originalError) {
+  try {
+    //1. ROLLBACK
+    await tx.connection.rollback();
+  } catch (rollbackErr) {
+    console.error(
+      `[TX] Failed to rollback transaction ${tx.txId} after error in ${context}:`,
+      rollbackErr
+    );
+  }
+
+  try {
+    //2. RELEASE POOL
+    tx.connection.release();
+  } catch (releaseErr) {
+    console.error(
+      `[TX] Failed to release connection for transaction ${tx.txId} after error in ${context}:`,
+      releaseErr
+    );
+  }
+
+  tx.status = 'rolledback';
+  tx.finishedAt = new Date();
+  tx.connection = null; // avoid accidental reuse
+
+  //propagate the original error back to caller
+  throw originalError;
 }
 
 //start new transaction on given node with a specified isolation level
@@ -50,7 +92,7 @@ async function startTransaction({ nodeId, isolationLevel, description }) {
     throw new Error('nodeId must be 1, 2, or 3');
   }
 
-  if (!isNodeOnline(node)) {
+  if (!(await isNodeOnline(node))) {
     throw new Error(
       `Node ${node} is offline in this simulation; cannot start a new transaction on it`
     );
@@ -104,7 +146,7 @@ async function startTransaction({ nodeId, isolationLevel, description }) {
 
 //read a specific trans row inside a transaction
 async function readTrans({ txId, transId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
   const id = parseInt(transId, 10);
 
   const [rows] = await tx.connection.query(
@@ -131,7 +173,7 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
     throw new Error('nodeId must be 1, 2, or 3');
   }
 
-  if (!isNodeOnline(node)) {
+  if (!(await isNodeOnline(node))) {
     throw new Error(
       `Node ${node} is offline in this simulation; cannot insert on it`
     );
@@ -205,121 +247,133 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
 //2. queue replication log entries for the change
 async function updateTrans(params) {
   const { txId, transId, amountDelta, balanceDelta } = params;
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
   const id = parseInt(transId, 10);
   const deltaAmount = Number(amountDelta || 0);
   const deltaBalance = Number(balanceDelta || 0);
 
-  //read current state 
-  //    then lock row for this transaction
-  const [rows] = await tx.connection.query(
-    `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
-    [id]
-  );
+  try {
+    //read current state 
+    //    then lock row for this transaction
+    const [rows] = await tx.connection.query(
+      `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+      [id]
+    );
 
-  if (!rows || rows.length === 0) {
-    throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
-  }
+    if (!rows || rows.length === 0) {
+      throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
+    }
 
-  const current = rows[0];
-  const amountBefore = current.amount;
-  const balanceBefore = current.balance;
-  const amountAfter = amountBefore + deltaAmount;
-  const balanceAfter = balanceBefore + deltaBalance;
+    const current = rows[0];
+    const amountBefore = current.amount;
+    const balanceBefore = current.balance;
+    const amountAfter = amountBefore + deltaAmount;
+    const balanceAfter = balanceBefore + deltaBalance;
 
-  await tx.connection.query(
-    `
-    UPDATE trans
-    SET amount = ?, balance = ?, last_updated_by_node = ?, version = version + 1
-    WHERE trans_id = ?
-    `,
-    [amountAfter, balanceAfter, tx.nodeId, id]
-  );
+    await tx.connection.query(
+      `
+      UPDATE trans
+      SET amount = ?, balance = ?, last_updated_by_node = ?, version = version + 1
+      WHERE trans_id = ?
+      `,
+      [amountAfter, balanceAfter, tx.nodeId, id]
+    );
 
   //queue replication log entries
-  await queueReplicationForRow(tx.connection, {
-    sourceNodeId: tx.nodeId,
-    transId: id,
-    type: current.type,
-    opType: 'UPDATE',
-    amountBefore,
-    balanceBefore,
-    amountAfter,
-    balanceAfter
-  });
+    await queueReplicationForRow(tx.connection, {
+      sourceNodeId: tx.nodeId,
+      transId: id,
+      type: current.type,
+      opType: 'UPDATE',
+      amountBefore,
+      balanceBefore,
+      amountAfter,
+      balanceAfter
+    });
 
-  const op = {
-    type: 'UPDATE',
-    transId: id,
-    at: new Date(),
-    amountBefore,
-    balanceBefore,
-    amountAfter,
-    balanceAfter
-  };
+    const op = {
+      type: 'UPDATE',
+      transId: id,
+      at: new Date(),
+      amountBefore,
+      balanceBefore,
+      amountAfter,
+      balanceAfter
+    };
 
-  tx.operations.push(op);
+    tx.operations.push(op);
 
-  return {
-    nodeId: tx.nodeId,
-    isolationLevel: tx.isolationLevel,
-    op
-  };
+    return {
+      nodeId: tx.nodeId,
+      isolationLevel: tx.isolationLevel,
+      op
+    };
+  } catch (err) {
+    //1. rollback
+    //2. release lock
+    //3. mark transaction as finished
+    return failAndCleanupTx(tx, 'UPDATE', err);
+  }
 }
 
 //DELETE row inside a transaction
 async function deleteTrans({ txId, transId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
   const id = parseInt(transId, 10);
 
-  //read current state --> logging and replication
-  const [rows] = await tx.connection.query(
-    `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
-    [id]
-  );
+  try {
+    //read current state --> logging and replication
+    const [rows] = await tx.connection.query(
+      `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+      [id]
+    );
 
-  if (!rows || rows.length === 0) {
-    throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
+    if (!rows || rows.length === 0) {
+      throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
+    }
+
+    const current = rows[0];
+
+    await tx.connection.query(
+      `DELETE FROM trans WHERE trans_id = ?`,
+      [id]
+    );
+
+    await queueReplicationForRow(tx.connection, {
+      sourceNodeId: tx.nodeId,
+      transId: id,
+      type: current.type,
+      opType: 'DELETE',
+      amountBefore: current.amount,
+      balanceBefore: current.balance,
+      amountAfter: null,
+      balanceAfter: null
+    });
+
+    const op = {
+      type: 'DELETE',
+      transId: id,
+      at: new Date(),
+      amountBefore: current.amount,
+      balanceBefore: current.balance
+    };
+
+    tx.operations.push(op);
+
+    return {
+      nodeId: tx.nodeId,
+      isolationLevel: tx.isolationLevel,
+      op
+    };
+  } catch (err) {
+    // Auto-cleanup: rollback + release + mark tx finished
+    return failAndCleanupTx(tx, 'DELETE', err);
   }
-
-  const current = rows[0];
-
-  await tx.connection.query(
-    `DELETE FROM trans WHERE trans_id = ?`,
-    [id]
-  );
-
-  await queueReplicationForRow(tx.connection, {
-    sourceNodeId: tx.nodeId,
-    transId: id,
-    type: current.type,
-    opType: 'DELETE',
-    amountBefore: current.amount,
-    balanceBefore: current.balance,
-    amountAfter: null,
-    balanceAfter: null
-  });
-
-  const op = {
-    type: 'DELETE',
-    transId: id,
-    at: new Date(),
-    amountBefore: current.amount,
-    balanceBefore: current.balance
-  };
-
-  tx.operations.push(op);
-
-  return {
-    nodeId: tx.nodeId,
-    isolationLevel: tx.isolationLevel,
-    op
-  };
 }
 
 //COMMIT transaction
 async function commitTransaction({ txId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
 
   await tx.connection.commit();
   tx.connection.release();
@@ -355,7 +409,7 @@ async function commitTransaction({ txId }) {
 
 //ROLLBACK transaction
 async function rollbackTransaction({ txId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
 
   await tx.connection.rollback();
   tx.connection.release();

@@ -1,4 +1,3 @@
-{{!-- === src/views/replication_logs.hbs === --}}
 <section class="card">
   <h2>
     Replication Logs on Node {{nodeId}} ({{nodeRole}})
@@ -110,7 +109,8 @@
   </div>
 
   {{#if hasRows}}
-    <table>
+  <div class="table-container">
+    <table class="replication-log-table">
       <thead>
         <tr>
           <th>
@@ -178,7 +178,8 @@
         {{/each}}
       </tbody>
     </table>
-  {{else}}
+  </div>
+{{else}}
     <p><em>No replication_log rows found on this node.</em></p>
   {{/if}}
 </section>

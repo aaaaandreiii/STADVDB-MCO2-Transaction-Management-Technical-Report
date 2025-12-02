@@ -23,7 +23,16 @@ router.post(
   wrap(async (req) => {
     const sourceNodeId = parseInt(req.body.sourceNodeId, 10);
     const targetNodeId = parseInt(req.body.targetNodeId, 10);
-    const limit = req.body.limit ? parseInt(req.body.limit, 10) : 10;
+    // const limit = req.body.limit ? parseInt(req.body.limit, 10) : 10;
+
+    let limit = parseInt(req.body.limit, 10);
+    if (Number.isNaN(limit) || limit <= 0) {
+      limit = 10;
+    }
+    const MAX_LIMIT = 1000;
+    if (limit > MAX_LIMIT) {
+      limit = MAX_LIMIT;
+    }
 
     if (!nodes[sourceNodeId]) {
       throw new Error(`Unknown sourceNodeId ${sourceNodeId}`);
