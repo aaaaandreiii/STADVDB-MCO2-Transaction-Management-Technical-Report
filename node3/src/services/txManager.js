@@ -25,7 +25,7 @@ function generateTxId() {
   return `tx-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 }
 
-function requireTx(txId) {
+async function requireTx(txId) {
   const tx = txStore.get(txId);
   if (!tx) {
     throw new Error(`Transaction ${txId} not found or already finished`);
@@ -35,7 +35,7 @@ function requireTx(txId) {
   }
   //integrate node failure into normal operations:
   //    if a node is marked offline, existing transactions on that node cannot proceed.
-  if (!isNodeOnline(tx.nodeId)) {
+  if (!(await isNodeOnline(tx.nodeId))) {
     throw new Error(
       `Node ${tx.nodeId} is offline in this simulation; transaction ${txId} cannot proceed`
     );
@@ -92,7 +92,7 @@ async function startTransaction({ nodeId, isolationLevel, description }) {
     throw new Error('nodeId must be 1, 2, or 3');
   }
 
-  if (!isNodeOnline(node)) {
+  if (!(await isNodeOnline(node))) {
     throw new Error(
       `Node ${node} is offline in this simulation; cannot start a new transaction on it`
     );
@@ -146,7 +146,7 @@ async function startTransaction({ nodeId, isolationLevel, description }) {
 
 //read a specific trans row inside a transaction
 async function readTrans({ txId, transId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
   const id = parseInt(transId, 10);
 
   const [rows] = await tx.connection.query(
@@ -173,7 +173,7 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
     throw new Error('nodeId must be 1, 2, or 3');
   }
 
-  if (!isNodeOnline(node)) {
+  if (!(await isNodeOnline(node))) {
     throw new Error(
       `Node ${node} is offline in this simulation; cannot insert on it`
     );
@@ -247,7 +247,7 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
 //2. queue replication log entries for the change
 async function updateTrans(params) {
   const { txId, transId, amountDelta, balanceDelta } = params;
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
   const id = parseInt(transId, 10);
   const deltaAmount = Number(amountDelta || 0);
   const deltaBalance = Number(balanceDelta || 0);
@@ -318,7 +318,7 @@ async function updateTrans(params) {
 
 //DELETE row inside a transaction
 async function deleteTrans({ txId, transId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
   const id = parseInt(transId, 10);
 
   try {
@@ -373,7 +373,7 @@ async function deleteTrans({ txId, transId }) {
 
 //COMMIT transaction
 async function commitTransaction({ txId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
 
   await tx.connection.commit();
   tx.connection.release();
@@ -409,7 +409,7 @@ async function commitTransaction({ txId }) {
 
 //ROLLBACK transaction
 async function rollbackTransaction({ txId }) {
-  const tx = requireTx(txId);
+  const tx = await requireTx(txId);
 
   await tx.connection.rollback();
   tx.connection.release();
