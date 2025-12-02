@@ -163,7 +163,7 @@
       Start transaction A\&/B
     </li>
     <li>
-      Row-Level Opoerations: Set both transactions to same row (ex: both <code>trans_id = 1</code>).
+      Row-Level Operations: Set both transactions to same row (ex: both <code>trans_id = 1</code>).
     </li>
     <li>
       Use READ/UPDATE/COMMIT in different orders
@@ -207,6 +207,32 @@
     logEl.scrollTop = logEl.scrollHeight;
   }
 
+  function isLockTimeoutMessage(msg) {
+    return (
+      typeof msg === 'string' &&
+      msg.indexOf('Row is locked by another transaction') !== -1
+    );
+  }
+
+  function handleTxError(panel, action, err) {
+    const message = (err && err.message) || 'Unknown error';
+
+    //log the raw error from the backend
+    log(panel, 'ERROR ' + action, { error: message });
+
+    //special case for when MySQL lock wait timeout
+    if (isLockTimeoutMessage(message)) {
+      log(
+        panel,
+        'Transaction ' +
+          panel +
+          ' was rolled back because it encountered a lock wait timeout.'
+      );
+    }
+
+    alert(message);
+  }
+
   async function startTx(panel) {
     try {
       const nodeId = getEl('tx' + panel + '-node').value;
@@ -222,8 +248,9 @@
       getEl('tx' + panel + '-id').value = data.tx.txId;
       log(panel, 'Started transaction', data.tx);
     } catch (err) {
-      log(panel, 'ERROR starting transaction', { error: err.message });
-      alert(err.message);
+      // log(panel, 'ERROR starting transaction', { error: err.message });
+      // alert(err.message);
+      handleTxError(panel, 'START', err);
     }
   }
 
@@ -250,8 +277,9 @@
       const data = await api('read', { txId, transId });
       log(panel, 'READ trans_id=' + transId, data.result.row);
     } catch (err) {
-      log(panel, 'ERROR READ', { error: err.message });
-      alert(err.message);
+      // log(panel, 'ERROR READ', { error: err.message });
+      // alert(err.message);
+      handleTxError(panel, 'READ', err);
     }
   }
 
@@ -266,8 +294,9 @@
       });
       log(panel, 'UPDATE trans_id=' + transId, data.result.op);
     } catch (err) {
-      log(panel, 'ERROR UPDATE', { error: err.message });
-      alert(err.message);
+      // log(panel, 'ERROR UPDATE', { error: err.message });
+      // alert(err.message);
+      handleTxError(panel, 'UPDATE', err);
     }
   }
 
@@ -277,8 +306,9 @@
       const data = await api('delete', { txId, transId });
       log(panel, 'DELETE trans_id=' + transId, data.result.op);
     } catch (err) {
-      log(panel, 'ERROR DELETE', { error: err.message });
-      alert(err.message);
+      // log(panel, 'ERROR DELETE', { error: err.message });
+      // alert(err.message);
+      handleTxError(panel, 'DELETE', err);
     }
   }
 
@@ -288,8 +318,9 @@
       const data = await api('commit', { txId });
       log(panel, 'COMMIT', data.result);
     } catch (err) {
-      log(panel, 'ERROR COMMIT', { error: err.message });
-      alert(err.message);
+      // log(panel, 'ERROR COMMIT', { error: err.message });
+      // alert(err.message);
+      handleTxError(panel, 'COMMIT', err);
     }
   }
 
@@ -299,8 +330,9 @@
       const data = await api('rollback', { txId });
       log(panel, 'ROLLBACK', data.result);
     } catch (err) {
-      log(panel, 'ERROR ROLLBACK', { error: err.message });
-      alert(err.message);
+      // log(panel, 'ERROR ROLLBACK', { error: err.message });
+      // alert(err.message);
+      handleTxError(panel, 'ROLLBACK', err);
     }
   }
 </script>

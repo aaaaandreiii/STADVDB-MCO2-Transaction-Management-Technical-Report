@@ -12,7 +12,29 @@ function wrap(handler) {
       }
     } catch (err) {
       console.error('[API/tx] Error:', err);
-      res.status(400).json({ ok: false, error: err.message });
+
+      //special case for when MySQL lock wait timeout
+      if (err && (err.code === 'ER_LOCK_WAIT_TIMEOUT' || err.errno === 1205)) {
+        return res.status(409).json({
+          ok: false,
+          error:
+            'Row is locked by another transaction. That transaction may have been rolled back automatically; please check the log.'
+        });
+      }
+
+      //special case for when transaction already finished
+      if (err && /Transaction .* is not active/.test(err.message || '')) {
+        return res.status(409).json({
+          ok: false,
+          error: err.message
+        });
+      }
+
+      // default
+      res.status(400).json({
+        ok: false,
+        error: err && err.message ? err.message : 'Unknown error'
+      });
     }
   };
 }
