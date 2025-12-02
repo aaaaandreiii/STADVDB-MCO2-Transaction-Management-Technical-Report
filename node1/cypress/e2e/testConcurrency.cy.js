@@ -34,10 +34,10 @@ describe("MCO2 Distributed Database Concurrency", () => {
                     cy.get('#txA-iso').select(`${level}`);
                     cy.contains('button', 'Start Tx A').click();
                     cy.wait('@apiStartTx');
-                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('Started transaction').scrollIntoView().should('be.visible');
                     cy.contains('button', 'READ').click();
                     cy.wait('@apiReadTx');
-                    cy.contains('READ trans_id').should('be.visible');
+                    cy.contains('READ trans_id').scrollIntoView().should('be.visible');
 
                     cy.origin(NODE2, { args: { level } }, ({ level }) => {
                         cy.visit('concurrency')
@@ -47,10 +47,10 @@ describe("MCO2 Distributed Database Concurrency", () => {
                         cy.get('#txA-iso').select(level);
                         cy.contains('button', 'Start Tx A').click();
                         cy.wait('@apiStartTx');
-                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('Started transaction').scrollIntoView().should('be.visible');
                         cy.contains('button', 'READ').click();
                         cy.wait('@apiReadTx');
-                        cy.contains('READ trans_id').should('be.visible');
+                        cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                     });
                 } else {
                     cy.visit(NODE1 + 'concurrency')
@@ -60,10 +60,10 @@ describe("MCO2 Distributed Database Concurrency", () => {
                     cy.get('#txA-iso').select(`${level}`);
                     cy.contains('button', 'Start Tx A').click();
                     cy.wait('@apiStartTx');
-                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('Started transaction').scrollIntoView().should('be.visible');
                     cy.contains('button', 'READ').click();
                     cy.wait('@apiReadTx');
-                    cy.contains('READ trans_id').should('be.visible');
+                    cy.contains('READ trans_id').scrollIntoView().should('be.visible');
 
                     cy.origin(NODE2, { args: { level } }, ({ level }) => {
                         cy.visit('concurrency')
@@ -73,13 +73,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                         cy.get('#txA-iso').select(level);
                         cy.contains('button', 'Start Tx A').click();
                         cy.wait('@apiStartTx');
-                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('Started transaction').scrollIntoView().should('be.visible');
                         cy.contains('button', 'READ').click();
                         cy.wait('@apiReadTx');
-                        cy.contains('READ trans_id').should('be.visible');
+                        cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                         // cy.contains('button', 'Commit').click();
                         // cy.wait('@apiCommitTx');
-                        // cy.contains('COMMIT').should('be.visible');
+                        // cy.contains('COMMIT').scrollIntoView().should('be.visible');
                     });
 
                     cy.visit(NODE1 + 'concurrency')
@@ -89,13 +89,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                     cy.get('#txA-iso').select(`${level}`);
                     cy.contains('button', 'Start Tx A').click();
                     cy.wait('@apiStartTx');
-                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('Started transaction').scrollIntoView().should('be.visible');
                     cy.contains('button', 'READ').click();
                     cy.wait('@apiReadTx');
-                    cy.contains('READ trans_id').should('be.visible');
+                    cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                     cy.contains('button', 'Commit').click();
                     cy.wait('@apiCommitTx');
-                    cy.contains('COMMIT').should('be.visible');
+                    cy.contains('COMMIT').scrollIntoView().should('be.visible');
                     
                     cy.origin(NODE2, { args: { level } }, ({ level }) => {
                         cy.visit('concurrency')
@@ -105,13 +105,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                         cy.get('#txA-iso').select(level);
                         cy.contains('button', 'Start Tx A').click();
                         cy.wait('@apiStartTx');
-                        cy.contains('Started transaction').should('be.visible');
+                        cy.contains('Started transaction').scrollIntoView().should('be.visible');
                         cy.contains('button', 'READ').click();
                         cy.wait('@apiReadTx');
-                        cy.contains('READ trans_id').should('be.visible');
+                        cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                         cy.contains('button', 'Commit').click();
                         cy.wait('@apiCommitTx');
-                        cy.contains('COMMIT').should('be.visible');
+                        cy.contains('COMMIT').scrollIntoView().should('be.visible');
                     });
                 }
             });
@@ -131,16 +131,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 cy.get('#txA-iso').select(`${level}`);
                 cy.contains('button', 'Start Tx A').click();
                 cy.wait('@apiStartTx');
-                cy.contains('Started transaction').should('be.visible');
+                cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 cy.contains('button', 'READ').click();
                 cy.wait('@apiReadTx');
-                cy.contains('READ trans_id').should('be.visible');
+                cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 cy.contains('button', 'UPDATE').click();
                 cy.wait('@apiUpdateTx');
-                //cy.contains('UPDATE trans_id').should('be.visible');
+                cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 cy.contains('button', 'Commit').click();
                 cy.wait('@apiCommitTx');
-                cy.contains('COMMIT').should('be.visible');
+                cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 
                 cy.origin(NODE2, { args: { level } }, ({ level }) => {
                     cy.visit('concurrency')
@@ -150,13 +150,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                     cy.get('#txA-iso').select(level);
                     cy.contains('button', 'Start Tx A').click();
                     cy.wait('@apiStartTx');
-                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('Started transaction').scrollIntoView().should('be.visible');
                     cy.contains('button', 'READ').click();
                     cy.wait('@apiReadTx');
-                    cy.contains('READ trans_id').should('be.visible');
+                    cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                     cy.contains('button', 'Commit').click();
                     cy.wait('@apiCommitTx');
-                    cy.contains('COMMIT').should('be.visible');
+                    cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 });
 
                 cy.origin(NODE3, { args: { level } }, ({ level }) => {
@@ -167,13 +167,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                     cy.get('#txA-iso').select(level);
                     cy.contains('button', 'Start Tx A').click();
                     cy.wait('@apiStartTx');
-                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('Started transaction').scrollIntoView().should('be.visible');
                     cy.contains('button', 'READ').click();
                     cy.wait('@apiReadTx');
-                    cy.contains('READ trans_id').should('be.visible');
+                    cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                     cy.contains('button', 'Commit').click();
                     cy.wait('@apiCommitTx');
-                    cy.contains('COMMIT').should('be.visible');
+                    cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 });
                 
                 // if(level == "READ UNCOMMITTED") {
@@ -184,16 +184,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     // cy.get('#txA-iso').select(`${level}`);
                 //     // cy.contains('button', 'Start Tx A').click();
                 //     // cy.wait('@apiStartTx');
-                //     // cy.contains('Started transaction').should('be.visible');
+                //     // cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'READ').click();
                 //     // cy.wait('@apiReadTx');
-                //     // cy.contains('READ trans_id').should('be.visible');
+                //     // cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'UPDATE').click();
                 //     // cy.wait('@apiUpdateTx');
-                //     // // cy.contains('UPDATE trans_id').should('be.visible');
+                //     // // cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'Commit').click();
                 //     // cy.wait('@apiCommitTx');
-                //     // cy.contains('COMMIT').should('be.visible');
+                //     // cy.contains('COMMIT').scrollIntoView().should('be.visible');
 
                 //     // cy.origin(NODE2, { args: { level } }, ({ level }) => {
                 //     //     cy.visit('concurrency')
@@ -203,10 +203,10 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // });
 
                 //     // cy.origin(NODE3, { args: { level } }, ({ level }) => {
@@ -217,10 +217,10 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // });
                 // } else {
                 //     // cy.visit(NODE1 + 'concurrency')
@@ -230,16 +230,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     // cy.get('#txA-iso').select(`${level}`);
                 //     // cy.contains('button', 'Start Tx A').click();
                 //     // cy.wait('@apiStartTx');
-                //     // cy.contains('Started transaction').should('be.visible');
+                //     // cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'READ').click();
                 //     // cy.wait('@apiReadTx');
-                //     // cy.contains('READ trans_id').should('be.visible');
+                //     // cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'UPDATE').click();
                 //     // cy.wait('@apiUpdateTx');
-                //     // //cy.contains('UPDATE trans_id').should('be.visible');
+                //     // //cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'Commit').click();
                 //     // cy.wait('@apiCommitTx');
-                //     // cy.contains('COMMIT').should('be.visible');
+                //     // cy.contains('COMMIT').scrollIntoView().should('be.visible');
 
                 //     // cy.origin(NODE2, { args: { level } }, ({ level }) => {
                 //     //     cy.visit('concurrency')
@@ -249,13 +249,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'Commit').click();
                 //     //     cy.wait('@apiCommitTx');
-                //     //     cy.contains('COMMIT').should('be.visible');
+                //     //     cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 //     // });
 
                 //     // cy.origin(NODE3, { args: { level } }, ({ level }) => {
@@ -266,13 +266,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'Commit').click();
                 //     //     cy.wait('@apiCommitTx');
-                //     //     cy.contains('COMMIT').should('be.visible');
+                //     //     cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 //     // });
 
                 //     // cy.visit(NODE1 + 'concurrency')
@@ -282,16 +282,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     // cy.get('#txA-iso').select(`${level}`);
                 //     // cy.contains('button', 'Start Tx A').click();
                 //     // cy.wait('@apiStartTx');
-                //     // cy.contains('Started transaction').should('be.visible');
+                //     // cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'READ').click();
                 //     // cy.wait('@apiReadTx');
-                //     // cy.contains('READ trans_id').should('be.visible');
+                //     // cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'UPDATE').click();
                 //     // cy.wait('@apiUpdateTx');
-                //     // //cy.contains('UPDATE trans_id').should('be.visible');
+                //     // //cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'Commit').click();
                 //     // cy.wait('@apiCommitTx');
-                //     // cy.contains('COMMIT').should('be.visible');
+                //     // cy.contains('COMMIT').scrollIntoView().should('be.visible');
                     
                 //     // cy.origin(NODE2, { args: { level } }, ({ level }) => {
                 //     //     cy.visit('concurrency')
@@ -301,13 +301,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'Commit').click();
                 //     //     cy.wait('@apiCommitTx');
-                //     //     cy.contains('COMMIT').should('be.visible');
+                //     //     cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 //     // });
 
                 //     // cy.origin(NODE3, { args: { level } }, ({ level }) => {
@@ -318,13 +318,13 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'Commit').click();
                 //     //     cy.wait('@apiCommitTx');
-                //     //     cy.contains('COMMIT').should('be.visible');
+                //     //     cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 //     // });
                 // }
             });
@@ -344,16 +344,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 cy.get('#txA-iso').select(`${level}`);
                 cy.contains('button', 'Start Tx A').click();
                 cy.wait('@apiStartTx');
-                cy.contains('Started transaction').should('be.visible');
+                cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 cy.contains('button', 'READ').click();
                 cy.wait('@apiReadTx');
-                cy.contains('READ trans_id').should('be.visible');
+                cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 cy.contains('button', 'UPDATE').click();
                 cy.wait('@apiUpdateTx');
-                cy.contains('UPDATE trans_id').should('be.visible');
+                cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 cy.contains('button', 'Commit').click();
                 cy.wait('@apiCommitTx');
-                cy.contains('COMMIT').should('be.visible');
+                cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 
                 cy.origin(NODE2, { args: { level } }, ({ level }) => {
                     cy.visit('concurrency')
@@ -363,16 +363,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                     cy.get('#txA-iso').select(level);
                     cy.contains('button', 'Start Tx A').click();
                     cy.wait('@apiStartTx');
-                    cy.contains('Started transaction').should('be.visible');
+                    cy.contains('Started transaction').scrollIntoView().should('be.visible');
                     cy.contains('button', 'READ').click();
                     cy.wait('@apiReadTx');
-                    cy.contains('READ trans_id').should('be.visible');
+                    cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                     cy.contains('button', 'UPDATE').click();
                     cy.wait('@apiUpdateTx');
-                    cy.contains('UPDATE trans_id').should('be.visible');
+                    cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                     cy.contains('button', 'Commit').click();
                     cy.wait('@apiCommitTx');
-                    cy.contains('COMMIT').should('be.visible');
+                    cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 });
                 
                 // if(level == "READ UNCOMMITTED") {
@@ -383,16 +383,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     // cy.get('#txA-iso').select(`${level}`);
                 //     // cy.contains('button', 'Start Tx A').click();
                 //     // cy.wait('@apiStartTx');
-                //     // cy.contains('Started transaction').should('be.visible');
+                //     // cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'READ').click();
                 //     // cy.wait('@apiReadTx');
-                //     // cy.contains('READ trans_id').should('be.visible');
+                //     // cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'UPDATE').click();
                 //     // cy.wait('@apiUpdateTx');
-                //     // cy.contains('UPDATE trans_id').should('be.visible');
+                //     // cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'Commit').click();
                 //     // cy.wait('@apiCommitTx');
-                //     // cy.contains('COMMIT').should('be.visible');
+                //     // cy.contains('COMMIT').scrollIntoView().should('be.visible');
 
                 //     // cy.origin(NODE2, { args: { level } }, ({ level }) => {
                 //     //     cy.visit('concurrency')
@@ -402,16 +402,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'UPDATE').click();
                 //     //     cy.wait('@apiUpdateTx');
-                //     //     cy.contains('UPDATE trans_id').should('be.visible');
+                //     //     cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'Commit').click();
                 //     //     cy.wait('@apiCommitTx');
-                //     //     cy.contains('COMMIT').should('be.visible');
+                //     //     cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 //     // });
                 // } else {
                 //     // cy.visit(NODE1 + 'concurrency')
@@ -421,16 +421,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     // cy.get('#txA-iso').select(`${level}`);
                 //     // cy.contains('button', 'Start Tx A').click();
                 //     // cy.wait('@apiStartTx');
-                //     // cy.contains('Started transaction').should('be.visible');
+                //     // cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'READ').click();
                 //     // cy.wait('@apiReadTx');
-                //     // cy.contains('READ trans_id').should('be.visible');
+                //     // cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'UPDATE').click();
                 //     // cy.wait('@apiUpdateTx');
-                //     // cy.contains('UPDATE trans_id').should('be.visible');
+                //     // cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'Commit').click();
                 //     // cy.wait('@apiCommitTx');
-                //     // cy.contains('COMMIT').should('be.visible');
+                //     // cy.contains('COMMIT').scrollIntoView().should('be.visible');
 
                 //     // cy.origin(NODE2, { args: { level } }, ({ level }) => {
                 //     //     cy.visit('concurrency')
@@ -440,16 +440,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'UPDATE').click();
                 //     //     cy.wait('@apiUpdateTx');
-                //     //     cy.contains('UPDATE trans_id').should('be.visible');
+                //     //     cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'Commit').click();
                 //     //     cy.wait('@apiCommitTx');
-                //     //     cy.contains('COMMIT').should('be.visible');
+                //     //     cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 //     // });
 
                 //     // cy.visit(NODE1 + 'concurrency')
@@ -459,16 +459,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     // cy.get('#txA-iso').select(`${level}`);
                 //     // cy.contains('button', 'Start Tx A').click();
                 //     // cy.wait('@apiStartTx');
-                //     // cy.contains('Started transaction').should('be.visible');
+                //     // cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'READ').click();
                 //     // cy.wait('@apiReadTx');
-                //     // cy.contains('READ trans_id').should('be.visible');
+                //     // cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'UPDATE').click();
                 //     // cy.wait('@apiUpdateTx');
-                //     // cy.contains('UPDATE trans_id').should('be.visible');
+                //     // cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     // cy.contains('button', 'Commit').click();
                 //     // cy.wait('@apiCommitTx');
-                //     // cy.contains('COMMIT').should('be.visible');
+                //     // cy.contains('COMMIT').scrollIntoView().should('be.visible');
                     
                 //     // cy.origin(NODE2, { args: { level } }, ({ level }) => {
                 //     //     cy.visit('concurrency')
@@ -478,16 +478,16 @@ describe("MCO2 Distributed Database Concurrency", () => {
                 //     //     cy.get('#txA-iso').select(level);
                 //     //     cy.contains('button', 'Start Tx A').click();
                 //     //     cy.wait('@apiStartTx');
-                //     //     cy.contains('Started transaction').should('be.visible');
+                //     //     cy.contains('Started transaction').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'READ').click();
                 //     //     cy.wait('@apiReadTx');
-                //     //     cy.contains('READ trans_id').should('be.visible');
+                //     //     cy.contains('READ trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'UPDATE').click();
                 //     //     cy.wait('@apiUpdateTx');
-                //     //     cy.contains('UPDATE trans_id').should('be.visible');
+                //     //     cy.contains('UPDATE trans_id').scrollIntoView().should('be.visible');
                 //     //     cy.contains('button', 'Commit').click();
                 //     //     cy.wait('@apiCommitTx');
-                //     //     cy.contains('COMMIT').should('be.visible');
+                //     //     cy.contains('COMMIT').scrollIntoView().should('be.visible');
                 //     // });
                 // }
             });
