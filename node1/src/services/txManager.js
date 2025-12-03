@@ -60,6 +60,7 @@ async function failAndCleanupTx(tx, context, originalError) {
   try {
     //1. ROLLBACK
     await tx.connection.rollback();
+    await tx.connection.release();
   } catch (rollbackErr) {
     console.error(
       `[TX] Failed to rollback transaction ${tx.txId} after error in ${context}:`,
