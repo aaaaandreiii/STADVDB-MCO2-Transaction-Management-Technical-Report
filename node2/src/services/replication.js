@@ -120,6 +120,15 @@ async function applySingleEvent(logRow, sourceNodeId, targetNodeId) {
   try {
     await targetConn.beginTransaction();
 
+    //replication from fragment to central
+    //    might need to fan out from central afterwards
+    const isFragmentToCentral =
+      targetNodeId === 1 && (sourceNodeId === 2 || sourceNodeId === 3);
+
+    let fanoutType = null;
+    let fanoutAmountAfter = null;
+    let fanoutBalanceAfter = null;
+
     if (logRow.op_type === 'UPDATE') {
       await targetConn.query(
         `
@@ -129,13 +138,27 @@ async function applySingleEvent(logRow, sourceNodeId, targetNodeId) {
         `,
         [logRow.amount_after, logRow.balance_after, logRow.source_node, logRow.trans_id]
       );
+
+      if (isFragmentToCentral) {
+        // type doesn't change on UPDATE, so read it on the central node
+        const [rowsType] = await targetConn.query(
+          `SELECT type FROM trans WHERE trans_id = ?`,
+          [logRow.trans_id]
+        );
+        if (rowsType[0]) {
+          fanoutType = rowsType[0].type;
+          fanoutAmountAfter = logRow.amount_after;
+          fanoutBalanceAfter = logRow.balance_after;
+        }
+      }
     } else if (logRow.op_type === 'DELETE') {
       await targetConn.query(
         `DELETE FROM trans WHERE trans_id = ?`,
         [logRow.trans_id]
       );
+      //for DELETE: fragment and central are already in sync
     } else if (logRow.op_type === 'INSERT') {
-      //INSERT: --> we need the full row from the source node
+      //for INSERT: need the full row from the source node
       const [rows] = await sourcePool.query(
         `SELECT * FROM trans WHERE trans_id = ?`,
         [logRow.trans_id]
@@ -175,8 +198,29 @@ async function applySingleEvent(logRow, sourceNodeId, targetNodeId) {
           r.version
         ]
       );
+
+      if (isFragmentToCentral) {
+        fanoutType = r.type;
+        fanoutAmountAfter = r.amount;
+        fanoutBalanceAfter = r.balance;
+      }
     } else {
       throw new Error(`Unknown op_type "${logRow.op_type}" in replication_log`);
+    }
+
+    //if fragment node updated a row and was just applied on the central node
+    //    queue a follow-up replication from node 1 to the appropriate fragment(s)
+    if (isFragmentToCentral && fanoutType) {
+      await queueReplicationForRow(targetConn, {
+        sourceNodeId: targetNodeId, // central node 1
+        transId: logRow.trans_id,
+        type: fanoutType,
+        opType: logRow.op_type,
+        amountBefore: logRow.amount_before,
+        balanceBefore: logRow.balance_before,
+        amountAfter: fanoutAmountAfter,
+        balanceAfter: fanoutBalanceAfter
+      });
     }
 
     await targetConn.commit();
