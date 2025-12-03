@@ -256,9 +256,16 @@ async function updateTrans(params) {
   try {
     //read current state 
     //    then lock row for this transaction
-    const [rows] = await tx.connection.query(
-      `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
-      [id]
+    const LOCK_TIMEOUT_MS = 10000;
+
+    let rows;
+    [rows] = await withTimeout(
+      tx.connection.query(
+        `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+        [id]
+      ),
+      LOCK_TIMEOUT_MS,
+      `Lock wait timeout (${LOCK_TIMEOUT_MS}ms) exceeded for trans_id=${id}`
     );
 
     if (!rows || rows.length === 0) {
