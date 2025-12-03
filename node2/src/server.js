@@ -1,14 +1,16 @@
 const app = require('./app');
 const { initPools, currentNodeId, currentNode } = require('./db');
 const { startAutoReplication } = require('./services/replication');
-const { initNodeStatus } = require('./state/nodeStatus'); // ⬅️ NEW
+const { initNodeStatus } = require('./state/nodeStatus');
+const { startTxCleanupWorker } = require('./services/txManager');
 
 const PORT = process.env.PORT || 3001;
 
 (async () => {
-  try {
+    try {
     await initPools();
     await initNodeStatus(); //ensure node_status table + rows exist
+    startTxCleanupWorker(); //start idle transaction cleanup
 
     app.listen(PORT, () => {
       startAutoReplication();

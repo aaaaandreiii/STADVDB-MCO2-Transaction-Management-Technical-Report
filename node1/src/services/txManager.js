@@ -12,6 +12,18 @@ const ISOLATION_LEVELS = [
 //in-memory map of active transactions: txId -> metadata
 const txStore = new Map();
 
+//timeout
+const TX_IDLE_TIMEOUT_MS = parseInt(
+  process.env.TX_IDLE_TIMEOUT_MS || '5000', //default is 5 seconds
+  10
+);
+const TX_SWEEP_INTERVAL_MS = parseInt(
+  process.env.TX_SWEEP_INTERVAL_MS || '500', //sweep every 0.5 seconds
+  10
+);
+
+let txCleanupTimer = null;
+
 function normalizeIsolationLevel(level) {
   if (!level) return null;
   const upper = String(level).trim().toUpperCase();
@@ -25,6 +37,35 @@ function generateTxId() {
   return `tx-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 }
 
+async function abortTxBecauseNodeOffline(tx) {
+  if (!tx || tx.status !== 'active' || !tx.connection) {
+    return;
+  }
+
+  try {
+    await tx.connection.rollback();
+  } catch (rollbackErr) {
+    console.error(
+      `[TX] Failed to rollback transaction ${tx.txId} after node ${tx.nodeId} went offline:`,
+      rollbackErr
+    );
+  }
+
+  try {
+    tx.connection.release();
+  } catch (releaseErr) {
+    console.error(
+      `[TX] Failed to release connection for transaction ${tx.txId} after node ${tx.nodeId} went offline:`,
+      releaseErr
+    );
+  }
+
+  tx.status = 'rolledback';
+  tx.finishedAt = new Date();
+  tx.connection = null;
+  txStore.delete(tx.txId);
+}
+
 async function requireTx(txId) {
   const tx = txStore.get(txId);
   if (!tx) {
@@ -33,13 +74,17 @@ async function requireTx(txId) {
   if (tx.status !== 'active') {
     throw new Error(`Transaction ${txId} is not active (status: ${tx.status})`);
   }
-  //integrate node failure into normal operations:
-  //    if a node is marked offline, existing transactions on that node cannot proceed.
+
+  //if node is offline, immediately roll back to simulate crash.
   if (!(await isNodeOnline(tx.nodeId))) {
+    await abortTxBecauseNodeOffline(tx);
     throw new Error(
-      `Node ${tx.nodeId} is offline in this simulation; transaction ${txId} cannot proceed`
+      `Node ${tx.nodeId} is offline in this simulation; transaction ${txId} was rolled back`
     );
   }
+
+  //track last activity for idle-timeout
+  tx.lastActivityAt = new Date();
   return tx;
 }
 
@@ -81,7 +126,8 @@ async function failAndCleanupTx(tx, context, originalError) {
   tx.finishedAt = new Date();
   tx.connection = null; // avoid accidental reuse
 
-  //propagate the original error back to caller
+  txStore.delete(tx.txId);
+
   throw originalError;
 }
 
@@ -114,13 +160,15 @@ async function startTransaction({ nodeId, isolationLevel, description }) {
     await conn.beginTransaction();
 
     const txId = generateTxId();
+    const now = new Date();
     const tx = {
       txId,
       nodeId: node,
       isolationLevel: iso,
       description: description || null,
       status: 'active',
-      startedAt: new Date(),
+      startedAt: now,
+      lastActivityAt: now,
       operations: [],
       connection: conn
     };
@@ -176,6 +224,24 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
   if (!(await isNodeOnline(node))) {
     throw new Error(
       `Node ${node} is offline in this simulation; cannot insert on it`
+    );
+  }
+
+  const normalizedType = String(type || '').trim();
+
+  //additional validation: enforce fragmentation rules on fragment nodes
+  if (node === 2 && normalizedType !== 'Credit') {
+    throw new Error(
+      'Node 2 is the "Credit" fragment. You may only insert rows with type = "Credit" on this node.'
+    );
+  }
+  if (
+    node === 3 &&
+    normalizedType !== 'Debit (Withdrawal)' &&
+    normalizedType !== 'VYBER'
+  ) {
+    throw new Error(
+      'Node 3 is the "Debit/VYBER" fragment. You may only insert rows with type = "Debit (Withdrawal)" or "VYBER" on this node.'
     );
   }
 
@@ -375,11 +441,41 @@ async function deleteTrans({ txId, transId }) {
 async function commitTransaction({ txId }) {
   const tx = await requireTx(txId);
 
-  await tx.connection.commit();
+  try {
+    await tx.connection.commit();
+  } catch (err) {
+    //best-effort rollback if commit fails
+    try {
+      await tx.connection.rollback();
+    } catch (rollbackErr) {
+      console.error(
+        `[TX] Failed to rollback after commit failure for ${tx.txId}:`,
+        rollbackErr
+      );
+    }
+    try {
+      tx.connection.release();
+    } catch (releaseErr) {
+      console.error(
+        `[TX] Failed to release connection after commit failure for ${tx.txId}:`,
+        releaseErr
+      );
+    }
+
+    tx.status = 'rolledback';
+    tx.finishedAt = new Date();
+    tx.connection = null;
+    txStore.delete(tx.txId);
+
+    throw err;
+  }
+
   tx.connection.release();
 
   tx.status = 'committed';
   tx.finishedAt = new Date();
+  tx.connection = null;
+  txStore.delete(tx.txId);
 
   console.log(
     `[TX] Committed transaction ${tx.txId} on node ${tx.nodeId}`
@@ -411,11 +507,23 @@ async function commitTransaction({ txId }) {
 async function rollbackTransaction({ txId }) {
   const tx = await requireTx(txId);
 
-  await tx.connection.rollback();
-  tx.connection.release();
+  try {
+    await tx.connection.rollback();
+  } finally {
+    try {
+      tx.connection.release();
+    } catch (releaseErr) {
+      console.error(
+        `[TX] Failed to release connection for transaction ${tx.txId} during rollback:`,
+        releaseErr
+      );
+    }
+  }
 
   tx.status = 'rolledback';
   tx.finishedAt = new Date();
+  tx.connection = null;
+  txStore.delete(tx.txId);
 
   console.log(
     `[TX] Rolled back transaction ${tx.txId} on node ${tx.nodeId}`
@@ -429,6 +537,82 @@ async function rollbackTransaction({ txId }) {
     finishedAt: tx.finishedAt
   };
 }
+
+async function sweepExpiredTransactions() {
+  if (TX_IDLE_TIMEOUT_MS <= 0) {
+    // timeout disabled
+    return;
+  }
+
+  const nowMs = Date.now();
+
+  for (const tx of txStore.values()) {
+    if (tx.status !== 'active') continue;
+
+    const last = tx.lastActivityAt || tx.startedAt || new Date(0);
+    const lastMs = last.getTime();
+    const idleMs = nowMs - lastMs;
+
+    if (idleMs >= TX_IDLE_TIMEOUT_MS) {
+      console.log(
+        `[TX] Auto-rollback of idle transaction ${tx.txId} on node ${tx.nodeId} after ${Math.round(
+          idleMs / 1000
+        )}s idle`
+      );
+
+      try {
+        if (tx.connection) {
+          try {
+            await tx.connection.rollback();
+          } catch (rollbackErr) {
+            console.error(
+              `[TX] Failed auto-rollback for idle transaction ${tx.txId}:`,
+              rollbackErr
+            );
+          }
+
+          try {
+            tx.connection.release();
+          } catch (releaseErr) {
+            console.error(
+              `[TX] Failed to release connection for idle transaction ${tx.txId}:`,
+              releaseErr
+            );
+          }
+        }
+      } finally {
+        tx.status = 'timeout_rolledback';
+        tx.finishedAt = new Date();
+        tx.connection = null;
+      }
+    }
+  }
+}
+
+function startTxCleanupWorker() {
+  if (TX_IDLE_TIMEOUT_MS <= 0) {
+    console.log(
+      '[TX] Idle transaction timeout disabled (TX_IDLE_TIMEOUT_MS <= 0)'
+    );
+    return;
+  }
+
+  if (txCleanupTimer) {
+    // already running
+    return;
+  }
+
+  txCleanupTimer = setInterval(() => {
+    sweepExpiredTransactions().catch((err) => {
+      console.error('[TX] Error in idle-transaction cleanup worker:', err);
+    });
+  }, TX_SWEEP_INTERVAL_MS);
+
+  console.log(
+    `[TX] Idle transaction cleanup worker started (timeout=${TX_IDLE_TIMEOUT_MS}ms, sweep=${TX_SWEEP_INTERVAL_MS}ms)`
+  );
+}
+
 
 //DEBUGGING: find all active/finished transactions
 function listTransactions() {
@@ -453,5 +637,6 @@ module.exports = {
   deleteTrans,
   commitTransaction,
   rollbackTransaction,
-  listTransactions
+  listTransactions,
+  startTxCleanupWorker
 };
