@@ -244,6 +244,14 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
   }
 }
 
+// small utility: wrap any promise with a timeout
+function withTimeout(promise, ms, msg = 'Operation timed out') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), ms))
+  ]);
+}
+
 //1. UPDATE a row inside a transaction
 //2. queue replication log entries for the change
 async function updateTrans(params) {
