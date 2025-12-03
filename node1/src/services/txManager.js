@@ -244,14 +244,6 @@ async function insertTrans({ nodeId, accountId, newdate, type, amount, balance }
   }
 }
 
-// small utility: wrap any promise with a timeout
-function withTimeout(promise, ms, msg = 'Operation timed out') {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), ms))
-  ]);
-}
-
 //1. UPDATE a row inside a transaction
 //2. queue replication log entries for the change
 async function updateTrans(params) {
@@ -264,16 +256,9 @@ async function updateTrans(params) {
   try {
     //read current state 
     //    then lock row for this transaction
-    const LOCK_TIMEOUT_MS = 10000;
-
-    let rows;
-    [rows] = await withTimeout(
-      tx.connection.query(
-        `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
-        [id]
-      ),
-      LOCK_TIMEOUT_MS,
-      `Lock wait timeout (${LOCK_TIMEOUT_MS}ms) exceeded for trans_id=${id}`
+    const [rows] = await tx.connection.query(
+      `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+      [id]
     );
 
     if (!rows || rows.length === 0) {
