@@ -253,86 +253,82 @@ async function updateTrans(params) {
   const deltaAmount = Number(amountDelta || 0);
   const deltaBalance = Number(balanceDelta || 0);
 
-  try {
-    //read current state
-    //    then lock row for this transaction
-    const LOCK_TIMEOUT_MS = 10000;
+  let timeoutHandle;
 
-    let rows;
+  // Start timeout watcher
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutHandle = setTimeout(async () => {
+      console.log("⛔ Transaction timed out, rolling back...");
+      try { await tx.connection.rollback(); } catch(_) {}
+      reject(new Error("TX_TIMEOUT"));
+    }, timeoutMs);
+  });
+
+  
+  const realWork = (async () => {
     try {
-      rows = await Promise.race([
-        // Attempt the lock
-        (async () => {
-          const [res] = await tx.connection.query(
-            `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
-            [id]
-          );
-          return res;
-        })(),
-
-        // Timeout fallback
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("LOCK_TIMEOUT")), LOCK_TIMEOUT_MS)
-        )
-      ]);
-    } catch (lockErr) {
-      return failAndCleanupTx(tx, 'LOCK_ACQUIRE', lockErr);
+      //read current state
+      //    then lock row for this transaction
+      const [rows] = await tx.connection.query(
+        `SELECT * FROM trans WHERE trans_id = ? FOR UPDATE`,
+        [id]
+      );
+  
+      if (!rows || rows.length === 0) {
+        throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
+      }
+  
+      const current = rows[0];
+      const amountBefore = current.amount;
+      const balanceBefore = current.balance;
+      const amountAfter = amountBefore + deltaAmount;
+      const balanceAfter = balanceBefore + deltaBalance;
+  
+      await tx.connection.query(
+        `
+        UPDATE trans
+        SET amount = ?, balance = ?, last_updated_by_node = ?, version = version + 1
+        WHERE trans_id = ?
+        `,
+        [amountAfter, balanceAfter, tx.nodeId, id]
+      );
+  
+    //queue replication log entries
+      await queueReplicationForRow(tx.connection, {
+        sourceNodeId: tx.nodeId,
+        transId: id,
+        type: current.type,
+        opType: 'UPDATE',
+        amountBefore,
+        balanceBefore,
+        amountAfter,
+        balanceAfter
+      });
+  
+      const op = {
+        type: 'UPDATE',
+        transId: id,
+        at: new Date(),
+        amountBefore,
+        balanceBefore,
+        amountAfter,
+        balanceAfter
+      };
+  
+      tx.operations.push(op);
+  
+      return {
+        nodeId: tx.nodeId,
+        isolationLevel: tx.isolationLevel,
+        op
+      };
+    } catch (err) {
+      //1. rollback
+      //2. release lock
+      //3. mark transaction as finished
+      return failAndCleanupTx(tx, 'UPDATE', err);
     }
-
-    if (!rows || rows.length === 0) {
-      throw new Error(`trans_id ${id} not found on node ${tx.nodeId}`);
-    }
-
-    const current = rows[0];
-    const amountBefore = current.amount;
-    const balanceBefore = current.balance;
-    const amountAfter = amountBefore + deltaAmount;
-    const balanceAfter = balanceBefore + deltaBalance;
-
-    await tx.connection.query(
-      `
-      UPDATE trans
-      SET amount = ?, balance = ?, last_updated_by_node = ?, version = version + 1
-      WHERE trans_id = ?
-      `,
-      [amountAfter, balanceAfter, tx.nodeId, id]
-    );
-
-  //queue replication log entries
-    await queueReplicationForRow(tx.connection, {
-      sourceNodeId: tx.nodeId,
-      transId: id,
-      type: current.type,
-      opType: 'UPDATE',
-      amountBefore,
-      balanceBefore,
-      amountAfter,
-      balanceAfter
-    });
-
-    const op = {
-      type: 'UPDATE',
-      transId: id,
-      at: new Date(),
-      amountBefore,
-      balanceBefore,
-      amountAfter,
-      balanceAfter
-    };
-
-    tx.operations.push(op);
-
-    return {
-      nodeId: tx.nodeId,
-      isolationLevel: tx.isolationLevel,
-      op
-    };
-  } catch (err) {
-    //1. rollback
-    //2. release lock
-    //3. mark transaction as finished
-    return failAndCleanupTx(tx, 'UPDATE', err);
-  }
+  })
 }
 
 //DELETE row inside a transaction
